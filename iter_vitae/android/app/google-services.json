@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "1027556531078",
+    "project_id": "itevitae-b9b87",
+    "storage_bucket": "itevitae-b9b87.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1027556531078:android:0e6e0dbcaca5c380556a07",
+        "android_client_info": {
+          "package_name": "com.itervitae.iter_vitae"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1027556531078-nobiinkfholdlcbl1n4a6hmqra39bn0v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-ZUdd33Uo2fVOJYjKQlzAJSOmejqliGk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1027556531078-nobiinkfholdlcbl1n4a6hmqra39bn0v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1027556531078-r23hnpmplm6u6i25rd4he3biv1scltn3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.itervitae.iterVitae"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

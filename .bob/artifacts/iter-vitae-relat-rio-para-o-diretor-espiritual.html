@@ -1,0 +1,445 @@
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Iter Vitae — Relatório de Acompanhamento</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #1f2328;
+    background: #f0ede8;
+    padding: 48px 16px 80px;
+  }
+
+  /* Simula a folha A4 */
+  .page-sheet {
+    max-width: 720px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.10), 0 0 0 1px rgba(0,0,0,.06);
+    padding: 56px 64px 64px;
+  }
+
+  /* ── Cabeçalho do documento ── */
+  .doc-head {
+    padding-bottom: 14px;
+    border-bottom: 1px solid #d0cdc8;
+    margin-bottom: 32px;
+  }
+  .doc-eyebrow {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #B23A2E;
+    margin-bottom: 6px;
+  }
+  .doc-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1714;
+    letter-spacing: -0.2px;
+    margin-bottom: 4px;
+  }
+  .doc-period {
+    font-size: 12px;
+    color: #7a7570;
+  }
+
+  /* ── Seção ── */
+  .section { margin-bottom: 30px; }
+  .section-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #B23A2E;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #f0ede8;
+  }
+
+  /* ── Bloco interno ── */
+  .block { margin-bottom: 16px; }
+  .block-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #a09a92;
+    margin-bottom: 5px;
+  }
+  .block-body {
+    font-size: 12.5px;
+    color: #2d2a27;
+    line-height: 1.75;
+  }
+
+  /* ── Barra de fidelidade ── */
+  .fidelity-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+  }
+  .fidelity-bar-track {
+    flex: 1;
+    height: 4px;
+    background: #f0ede8;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .fidelity-bar-fill {
+    height: 100%;
+    background: #B23A2E;
+    border-radius: 2px;
+  }
+  .fidelity-pct {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #B23A2E;
+    min-width: 34px;
+    text-align: right;
+  }
+
+  /* ── Semana da luta ── */
+  .luta-week {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .luta-day {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    border: 1px solid #e5e1da;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .luta-day-label { font-size: 8px; font-weight: 600; color: #a09a92; }
+  .luta-day.achieved { background: #fde8e6; border-color: #B23A2E; color: #B23A2E; }
+  .luta-day.fought { background: #fff8f0; border-color: #d9823a; color: #a85c20; }
+  .luta-day.norecord { background: #f5f4f0; color: #c0bbb5; }
+  .luta-day.future { background: #f9f9f9; color: #ddd; border-style: dashed; }
+  .luta-legend {
+    display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap;
+    font-size: 11px; color: #7a7570;
+  }
+  .luta-legend span { display: flex; align-items: center; gap: 4px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  /* ── Lista com bullets ── */
+  .bullet-list { list-style: none; padding: 0; }
+  .bullet-list li {
+    font-size: 12.5px;
+    color: #2d2a27;
+    padding: 3px 0 3px 16px;
+    position: relative;
+    line-height: 1.65;
+  }
+  .bullet-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #B23A2E;
+    font-size: 13px;
+    top: 3px;
+  }
+
+  /* ── Perguntas ── */
+  .questions-list { list-style: none; padding: 0; }
+  .q-item {
+    display: flex;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid #f5f4f0;
+    font-size: 12.5px;
+    color: #2d2a27;
+    align-items: flex-start;
+    line-height: 1.6;
+  }
+  .q-item:last-child { border-bottom: none; }
+  .q-open { color: #B23A2E; font-size: 13px; flex-shrink: 0; padding-top: 1px; }
+  .q-resolved { color: #a09a92; font-size: 11px; flex-shrink: 0; padding-top: 3px; }
+  .q-text-resolved { color: #a09a92; text-decoration: line-through; }
+
+  /* ── Caixa de nota ── */
+  .note-box {
+    background: #faf9f7;
+    border: 1px solid #e5e1da;
+    border-left: 3px solid #B23A2E;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #3d3730;
+    line-height: 1.75;
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  /* ── Leituras ── */
+  .reading-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid #f5f4f0;
+    gap: 12px;
+  }
+  .reading-item:last-child { border-bottom: none; }
+  .reading-info { flex: 1; }
+  .reading-title { font-size: 12.5px; font-weight: 600; color: #1a1714; }
+  .reading-author { font-size: 11px; color: #7a7570; }
+  .reading-prog {
+    font-size: 11px;
+    font-weight: 700;
+    color: #B23A2E;
+    min-width: 36px;
+    text-align: right;
+  }
+
+  /* ── Virtude ── */
+  .virtude-box {
+    border: 1px solid #e5e1da;
+    border-radius: 8px;
+    padding: 14px 18px;
+    background: #faf9f7;
+  }
+  .virtude-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1714;
+    margin-bottom: 4px;
+  }
+  .virtude-purpose {
+    font-size: 12.5px;
+    color: #3d3730;
+    font-style: italic;
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+
+  /* ── Divisor de seção ── */
+  .divider { height: 1px; background: #e5e1da; margin: 24px 0; }
+
+  /* ── Rodapé do documento ── */
+  .doc-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    border-top: 1px solid #d0cdc8;
+    margin-top: 36px;
+    font-size: 10px;
+    color: #a09a92;
+  }
+
+  /* ── Footer Made with Bob ── */
+  .footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e1da;
+    text-align: center;
+    font-size: 12px;
+    color: #a09a92;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-sheet">
+
+  
+  <div class="doc-head">
+    <div class="doc-eyebrow">Iter Vitae · Relatório de Acompanhamento</div>
+    <div class="doc-title">Plano de Vida — Relatório para o Diretor Espiritual</div>
+    <div class="doc-period">Período: 01/07/2025 até 28/07/2025</div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">1. Luta atual</div>
+    <div class="block">
+      <div class="block-label">Tema da luta</div>
+      <div class="block-body">Manter a serenidade no trabalho diante das pressões externas e responder com paciência nas situações de conflito.</div>
+    </div>
+    <div class="block">
+      <div class="block-label">Registro desta semana</div>
+      <div class="luta-week">
+        <div class="luta-day achieved"><span>✓</span><span class="luta-day-label">Seg</span></div>
+        <div class="luta-day achieved"><span>✓</span><span class="luta-day-label">Ter</span></div>
+        <div class="luta-day fought"><span>↘</span><span class="luta-day-label">Qua</span></div>
+        <div class="luta-day achieved"><span>✓</span><span class="luta-day-label">Qui</span></div>
+        <div class="luta-day norecord"><span>—</span><span class="luta-day-label">Sex</span></div>
+        <div class="luta-day future"><span>—</span><span class="luta-day-label">Sáb</span></div>
+        <div class="luta-day future"><span>—</span><span class="luta-day-label">Dom</span></div>
+      </div>
+      <div class="luta-legend">
+        <span><span class="dot" style="background:#B23A2E"></span> 3 consegui</span>
+        <span><span class="dot" style="background:#d9823a"></span> 1 lutei e caí</span>
+        <span><span class="dot" style="background:#d0cdc8"></span> 1 sem registro</span>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">2. a) Formação espiritual</div>
+
+    <div class="block">
+      <div class="block-label">Fidelidade às práticas espirituais</div>
+      <div class="block-body">78% das práticas realizadas no período</div>
+      <div class="fidelity-bar-wrap">
+        <div class="fidelity-bar-track"><div class="fidelity-bar-fill" style="width:78%"></div></div>
+        <span class="fidelity-pct">78%</span>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block-label">Práticas</div>
+      <ul class="bullet-list">
+        <li>Oração mental (30 min) — 21 realizações no período</li>
+        <li>Leitura espiritual — 18 realizações no período</li>
+        <li>Terço — 15 realizações no período</li>
+        <li>Exame diário — 24 realizações no período</li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <div class="block-label">Luzes na oração mental</div>
+      <ul class="bullet-list">
+        <li>Durante a meditação do Evangelho de João, forte sensação de chamado à simplicidade.</li>
+        <li>Dificuldade em manter a concentração nos primeiros 10 minutos; melhorou ao longo do mês.</li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <div class="block-label">Meios de formação e notas</div>
+      <div class="note-box">Participei do recolhimento mensal no dia 14/07. Trouxe paz para os dias seguintes. Sinto que a oração mental está se aprofundando, mas ainda falta constância nos fins de semana.</div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">3. b) Formação profissional, social e cultural</div>
+
+    <div class="block">
+      <div class="block-label">Leituras em andamento</div>
+      <div style="margin-top:4px">
+        <div class="reading-item">
+          <div class="reading-info">
+            <div class="reading-title">Caminho</div>
+            <div class="reading-author">Josemaría Escrivá</div>
+          </div>
+          <div class="reading-prog">62%</div>
+        </div>
+        <div class="reading-item">
+          <div class="reading-info">
+            <div class="reading-title">Estoicismo — A Arte de Viver</div>
+            <div class="reading-author">Marco Aurélio / Ryan Holiday</div>
+          </div>
+          <div class="reading-prog">35%</div>
+        </div>
+        <div class="reading-item">
+          <div class="reading-info">
+            <div class="reading-title">Sapiens</div>
+            <div class="reading-author">Yuval Noah Harari</div>
+          </div>
+          <div class="reading-prog">88%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block-label">Observações</div>
+      <div class="note-box">O trabalho esteve mais intenso este mês com a entrega do projeto. Consegui manter leitura de ao menos 20 minutos por dia, mas sacrifiquei o estudo de línguas. Pretendo retomar em agosto.</div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">4. c) Formação humana</div>
+
+    <div class="block">
+      <div class="block-label">Virtude a ser exercida: Paciência</div>
+      <div class="virtude-box">
+        <div class="virtude-name">Paciência</div>
+        <div class="virtude-purpose">Agir com serenidade diante das irritações cotidianas, especialmente no ambiente de trabalho. Antes de responder, respirar e lembrar do propósito.</div>
+        <ul class="bullet-list">
+          <li>Houve progresso visível nas reuniões de equipe — menos reatividade imediata.</li>
+          <li>Ainda há dificuldade com atrasos de colegas; continua sendo ponto de trabalho.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block-label">Notas do bloco c</div>
+      <div class="note-box">A relação com a família esteve bem este mês. Priorizei os jantares em casa e algumas conversas mais profundas com minha esposa sobre projetos futuros. Sinto que estou mais presente.</div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">5. Perguntas para a direção</div>
+
+    <div class="block-label" style="margin-bottom:8px">Em aberto</div>
+    <ul class="questions-list">
+      <li class="q-item">
+        <span class="q-open">○</span>
+        <span>Como discernir quando a intensidade no trabalho deixa de ser virtude e vira desequilíbrio? Qual o critério prático?</span>
+      </li>
+      <li class="q-item">
+        <span class="q-open">○</span>
+        <span>Sinto atração por uma vocação mais contemplativa — como avaliar isso sem precipitação?</span>
+      </li>
+      <li class="q-item">
+        <span class="q-open">○</span>
+        <span>O apostolado com os colegas de trabalho deveria ter mais estrutura ou mantê-lo espontâneo é o certo?</span>
+      </li>
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="block-label" style="margin-bottom:8px">Resolvidas</div>
+    <ul class="questions-list">
+      <li class="q-item">
+        <span class="q-resolved">✓</span>
+        <span class="q-text-resolved">Como lidar com a sensação de aridez na oração mental — é sinal de algo ou fase normal?</span>
+      </li>
+      <li class="q-item">
+        <span class="q-resolved">✓</span>
+        <span class="q-text-resolved">Qual a frequência ideal para o exame particular neste momento da minha vida?</span>
+      </li>
+    </ul>
+  </div>
+
+  
+  <div class="doc-foot">
+    <span>Iter Vitae</span>
+    <span>p. 1 / 1</span>
+  </div>
+
+</div>
+
+<div class="footer">Made with IBM Bob</div>
+</body>
+</html>

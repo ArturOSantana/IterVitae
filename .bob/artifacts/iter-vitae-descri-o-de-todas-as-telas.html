@@ -1,0 +1,568 @@
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Iter Vitae — Descrição de todas as telas</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.75;
+    color: #1f2328;
+    background: #f5f4f0;
+    padding: 48px 16px 80px;
+  }
+
+  .page { max-width: 780px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .doc-header {
+    background: #1a1714;
+    border-radius: 12px;
+    padding: 36px 40px 32px;
+    margin-bottom: 32px;
+    color: #fff;
+  }
+  .doc-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: #B23A2E;
+    margin-bottom: 10px;
+  }
+  .doc-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #f5f4f0;
+    letter-spacing: -0.4px;
+    margin-bottom: 8px;
+    line-height: 1.25;
+  }
+  .doc-subtitle {
+    font-size: 13px;
+    color: #a09a92;
+    line-height: 1.6;
+  }
+
+  /* ── Identity strip ── */
+  .identity-strip {
+    background: #fff;
+    border: 1px solid #e5e1da;
+    border-left: 3px solid #B23A2E;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    font-size: 13px;
+    color: #3d3730;
+    line-height: 1.7;
+  }
+  .identity-strip strong { color: #B23A2E; }
+
+  /* ── Nav bar ── */
+  .nav-section {
+    background: #fff;
+    border: 1px solid #e5e1da;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+  }
+  .nav-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #a09a92;
+    margin-bottom: 12px;
+  }
+  .nav-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .nav-item {
+    background: #f5f4f0;
+    border: 1px solid #e5e1da;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12.5px;
+    color: #3d3730;
+    font-weight: 500;
+  }
+  .nav-item.active {
+    background: #B23A2E;
+    border-color: #B23A2E;
+    color: #fff;
+    font-weight: 600;
+  }
+  .nav-note {
+    font-size: 12px;
+    color: #a09a92;
+    margin-top: 6px;
+  }
+  .nav-note code {
+    background: #f5f4f0;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11.5px;
+  }
+
+  /* ── Screen section ── */
+  .screen {
+    background: #fff;
+    border: 1px solid #e5e1da;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .screen-header-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #faf9f7;
+    border-bottom: 1px solid #e5e1da;
+  }
+  .screen-number {
+    font-size: 11px;
+    font-weight: 800;
+    color: #B23A2E;
+    letter-spacing: 0.4px;
+    background: #fde8e6;
+    border-radius: 6px;
+    padding: 2px 8px;
+  }
+  .screen-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1714;
+    flex: 1;
+  }
+  .screen-route {
+    font-size: 11.5px;
+    color: #a09a92;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    background: #f0ede8;
+    border: 1px solid #e5e1da;
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+  .screen-body {
+    padding: 18px 20px 20px;
+  }
+  .screen-purpose {
+    font-size: 13.5px;
+    color: #57504a;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f0ede8;
+    font-style: italic;
+    line-height: 1.65;
+  }
+
+  /* ── Elements list ── */
+  .elements-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #a09a92;
+    margin-bottom: 10px;
+  }
+  .el-list { list-style: none; padding: 0; }
+  .el-list li {
+    padding: 6px 0 6px 22px;
+    position: relative;
+    font-size: 13.5px;
+    border-bottom: 1px solid #f5f4f0;
+    color: #1f2328;
+    line-height: 1.6;
+  }
+  .el-list li:last-child { border-bottom: none; }
+  .el-list li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: #B23A2E;
+    font-size: 12px;
+    top: 7px;
+  }
+  .pilcrow { color: #B23A2E; font-weight: 700; }
+
+  /* ── Rules block ── */
+  .rules-block {
+    background: #faf9f7;
+    border: 1px solid #e5e1da;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-top: 14px;
+    font-size: 13px;
+  }
+  .rules-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #a09a92;
+    margin-bottom: 8px;
+  }
+  .rules-block ul { list-style: none; padding: 0; }
+  .rules-block ul li {
+    padding: 4px 0 4px 18px;
+    position: relative;
+    color: #3d3730;
+    line-height: 1.6;
+  }
+  .rules-block ul li::before {
+    content: "·";
+    position: absolute;
+    left: 5px;
+    color: #a09a92;
+    font-size: 16px;
+    top: 1px;
+  }
+
+  /* ── Never block ── */
+  .never-block {
+    border: 1px solid #fcd5d2;
+    background: #fff8f7;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: #7a1a14;
+    line-height: 1.65;
+  }
+  .never-block strong {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    display: block;
+    margin-bottom: 4px;
+    color: #B23A2E;
+  }
+
+  /* ── Sub-section ── */
+  .sub-section { margin-top: 16px; }
+  .sub-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #a09a92;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    padding: 4px 10px;
+    background: #f5f4f0;
+    border-radius: 4px;
+    display: inline-block;
+  }
+
+  /* ── Mais grid ── */
+  .mais-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .mais-card {
+    background: #faf9f7;
+    border: 1px solid #e5e1da;
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-size: 13px;
+  }
+  .mais-card-title {
+    font-weight: 700;
+    color: #1a1714;
+    margin-bottom: 5px;
+    font-size: 13.5px;
+  }
+  .mais-card-desc { color: #57504a; font-size: 12.5px; line-height: 1.55; }
+
+  /* ── Conventions ── */
+  .conventions-section {
+    background: #fff;
+    border: 1px solid #e5e1da;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .conventions-header {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1714;
+    padding: 14px 20px;
+    background: #faf9f7;
+    border-bottom: 1px solid #e5e1da;
+  }
+  .conv-item {
+    display: flex;
+    gap: 14px;
+    padding: 11px 20px;
+    border-bottom: 1px solid #f5f4f0;
+    font-size: 13.5px;
+    align-items: flex-start;
+    line-height: 1.6;
+  }
+  .conv-item:last-child { border-bottom: none; }
+  .conv-icon {
+    color: #B23A2E;
+    font-weight: 700;
+    min-width: 18px;
+    padding-top: 1px;
+    font-size: 15px;
+  }
+
+  /* ── Section divider ── */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0 20px;
+  }
+  .section-divider-line { flex: 1; height: 1px; background: #e5e1da; }
+  .section-divider-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #a09a92;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 56px;
+    padding-top: 18px;
+    border-top: 1px solid #e5e1da;
+    text-align: center;
+    font-size: 12px;
+    color: #a09a92;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="doc-header">
+    <div class="doc-eyebrow">Documento de Referência</div>
+    <div class="doc-title">Iter Vitae — Descrição de Todas as Telas</div>
+    <div class="doc-subtitle">Visão geral consolidada · Não substitui os handoffs técnicos anteriores</div>
+  </div>
+
+  
+  <div class="identity-strip">
+    <strong>Identidade visual</strong> — Fonte <em>Fraunces</em> (serifa) em títulos e marcadores de seção · Corpo em fonte padrão do tema · Acento único <strong>#B23A2E rubrica</strong>, apenas em texto / ícone / borda de destaque e ações, nunca como fundo preenchido · Marcador de seção <strong class="pilcrow">¶</strong> (pilcrow) antes de cada cabeçalho de grupo, sem ícone ou emoji genérico
+  </div>
+
+  
+  <div class="nav-section">
+    <div class="nav-label">Bottom nav / Rail</div>
+    <div class="nav-bar">
+      <span class="nav-item active">Hoje</span>
+      <span class="nav-item">Regra de Vida</span>
+      <span class="nav-item">Leituras</span>
+      <span class="nav-item">Direção</span>
+      <span class="nav-item">Mais</span>
+    </div>
+    <p class="nav-note">Mobile → <code>BottomNavigationBar</code>  ·  Tablet / Desktop ≥ 600 px → <code>NavigationRail</code></p>
+  </div>
+
+  
+  <div class="screen">
+    <div class="screen-header-bar">
+      <span class="screen-number">01</span>
+      <span class="screen-title">Hoje</span>
+      <span class="screen-route">/hoje</span>
+    </div>
+    <div class="screen-body">
+      <div class="screen-purpose">Tela inicial aberta todos os dias. Resumo de fidelidade, luta em destaque, práticas do dia e virtude a exercer.</div>
+      <div class="elements-label">Elementos — de cima para baixo</div>
+      <ul class="el-list">
+        <li>Cabeçalho: data atual + "Iter Vitae"</li>
+        <li>Card de fidelidade: barra 2 px preenchimento <span style="color:#B23A2E">rubrica</span>, "X de Y práticas concluídas"</li>
+        <li><span class="pilcrow">¶</span> <strong>luta atual</strong> — borda esquerda rubrica, descrição, três botões de estado tocáveis aqui mesmo: <em>consegui / lutei e caí / nem lutei</em>. Se sem luta ativa, convite para adicionar</li>
+        <li><span class="pilcrow">¶</span> <strong>práticas de hoje</strong> — lista com nome, horário e ação "concluir" <span style="color:#B23A2E">(texto rubrica)</span> ou status "feito" (texto neutro)</li>
+        <li><span class="pilcrow">¶</span> <strong>virtude a ser exercida</strong> — nome + propósito prático. Sem barra de progresso, sem percentual</li>
+        <li>Se Meio de formação em ≤ 7 dias: linha discreta "<span class="pilcrow">¶</span> [tipo] em X dias", tocável → Meios de formação</li>
+      </ul>
+      <div class="never-block">
+        <strong>Nunca tem</strong>
+        Edição de estrutura (horário, frequência) — isso é só na Regra de Vida · Campo de reflexão livre — a revisão do dia vive exclusivamente no Exame Diário
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="screen">
+    <div class="screen-header-bar">
+      <span class="screen-number">02</span>
+      <span class="screen-title">Regra de Vida</span>
+      <span class="screen-route">/regra-de-vida</span>
+    </div>
+    <div class="screen-body">
+      <div class="screen-purpose">Fonte de verdade das práticas da rotina espiritual, humana, profissional, cultural e de apostolado. A tela Hoje lê daqui todos os dias.</div>
+      <div class="elements-label">Elementos</div>
+      <ul class="el-list">
+        <li>Título "Regra de vida" + subtítulo de versão / data de início</li>
+        <li>Lista agrupada por categoria — 5 grupos, cada um com cabeçalho "<span class="pilcrow">¶</span> categoria", cada prática: nome, horário, frequência resumida</li>
+        <li>Botão "nova prática" (outline rubrica) no fim da lista</li>
+        <li>Formulário de prática em tela própria (nunca modal): nome, categoria, tipo <em>(contemplativa / ativa / formativa)</em>, horário, frequência (diária ou dias específicos via chips)</li>
+      </ul>
+      <div class="rules-block">
+        <div class="rules-label">Regras de comportamento</div>
+        <ul>
+          <li>Editar horário/frequência não altera histórico — vale a partir de hoje/amanhã</li>
+          <li>Desativar uma prática entra em vigor só a partir de amanhã; o dia corrente exibe normalmente até meia-noite</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="screen">
+    <div class="screen-header-bar">
+      <span class="screen-number">03</span>
+      <span class="screen-title">Leituras</span>
+      <span class="screen-route">/leituras</span>
+    </div>
+    <div class="screen-body">
+      <div class="screen-purpose">Biblioteca pessoal de livros (espiritual, cultural, profissional) com progresso e sessões de leitura registradas.</div>
+      <div class="elements-label">Elementos</div>
+      <ul class="el-list">
+        <li>Lista agrupada "<span class="pilcrow">¶</span> categoria" — cada livro: título, autor, barra 2 px rubrica + percentual ao lado, ou "quero ler"</li>
+        <li>Botão "novo livro" (outline rubrica)</li>
+        <li>Tela de detalhe: progresso ampliado, "continuar leitura" → registro de sessão, histórico de sessões</li>
+        <li>Registro de sessão: páginas lidas, tempo, e dois campos opcionais — "o que me chamou atenção" / "o que posso aplicar"</li>
+        <li>Formulário de novo livro: título, autor, categoria + campo opcional "já estou nessa página" (só na criação, define ponto de partida, não gera sessão)</li>
+      </ul>
+      <div class="rules-block">
+        <div class="rules-label">Regras de comportamento</div>
+        <ul>
+          <li>Vários livros podem estar "em andamento" ao mesmo tempo, inclusive na mesma categoria</li>
+          <li>Concluir é sempre ação manual do usuário — nunca automático por 100% de páginas</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="screen">
+    <div class="screen-header-bar">
+      <span class="screen-number">04</span>
+      <span class="screen-title">Direção</span>
+      <span class="screen-route">/direcao</span>
+    </div>
+    <div class="screen-body">
+      <div class="screen-purpose">Hub da relação com o diretor espiritual — preparação para o próximo encontro e histórico dos já realizados. Detalhamento técnico completo: <em>iter-vitae-comando-tela-direcao-completa.md</em>.</div>
+      <div class="elements-label">Estrutura: <code style="background:#f5f4f0;padding:1px 6px;border-radius:3px;font-size:12px">SegmentedControl</code> — "preparar" (padrão) / "histórico"</div>
+
+      <div class="sub-section">
+        <span class="sub-section-title">Visão Preparar</span>
+        <ul class="el-list" style="margin-top:8px">
+          <li>Contagem regressiva até a próxima direção</li>
+          <li>Card "<span class="pilcrow">¶</span> luta atual" com contagem semanal (consegui / lutei e caí / sem registro)</li>
+          <li><span class="pilcrow">¶</span> <strong>a) formação espiritual</strong> — fidelidade das práticas, dificuldades/luzes na oração mental, meios de formação</li>
+          <li><span class="pilcrow">¶</span> <strong>b) formação profissional, social e cultural</strong> — trabalho, estudos, leituras culturais/profissionais</li>
+          <li><span class="pilcrow">¶</span> <strong>c) formação humana</strong> — reflexões de família e convivência, vindas do Diário</li>
+          <li>Cada bloco tem campo de nota livre, persistido para o encontro</li>
+          <li><span class="pilcrow">¶</span> perguntas para levar — lista editável com marcação "resolvida"</li>
+          <li>Botão "gerar relatório para o padre" — seleção do que incluir; Diário pessoal desmarcado por padrão</li>
+        </ul>
+      </div>
+
+      <div class="sub-section" style="margin-top:18px">
+        <span class="sub-section-title">Visão Histórico</span>
+        <ul class="el-list" style="margin-top:8px">
+          <li>Botão "registrar direção realizada"</li>
+          <li>Lista das direções ocorridas (mais recente primeiro), expansível: orientações recebidas + propósitos combinados</li>
+          <li>Formulário de registro em tela própria: data, pontos trabalhados, orientações recebidas, propósitos combinados, próxima direção (opcional) — alimenta a contagem regressiva da visão Preparar seguinte</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="screen">
+    <div class="screen-header-bar">
+      <span class="screen-number">05</span>
+      <span class="screen-title">Mais</span>
+      <span class="screen-route">/mais</span>
+    </div>
+    <div class="screen-body">
+      <div class="screen-purpose">Hub de navegação para features que não são de uso diário. Lista simples, um item por linha, sem sub-abas.</div>
+      <div class="mais-grid">
+        <div class="mais-card">
+          <div class="mais-card-title">Diário</div>
+          <div class="mais-card-desc">Escrita livre, não vinculada a práticas. Lista cronológica + tela de novo registro (texto livre + tags opcionais). Único lugar do app para assuntos sensíveis — nunca pergunta estruturada.</div>
+        </div>
+        <div class="mais-card">
+          <div class="mais-card-title">Virtudes em foco</div>
+          <div class="mais-card-desc">Virtude atual (igual à exibida em Hoje) + histórico com propósitos e reflexões. Troca é ação explícita (fecha <em>endDate</em> atual, abre nova) — nunca automático por mês.</div>
+        </div>
+        <div class="mais-card">
+          <div class="mais-card-title">Exame diário</div>
+          <div class="mais-card-desc">Cinco pontos de Santo Inácio. Feito à noite. Visão "esta semana" com registros lado a lado para releitura de padrões — sem contagem numérica.</div>
+        </div>
+        <div class="mais-card">
+          <div class="mais-card-title">Exame para confissão</div>
+          <div class="mais-card-desc">Checklist categorizado, marcável a cada sessão. Botão "nova sessão de confissão" limpa as marcações. Não é tracker de recorrência.</div>
+        </div>
+        <div class="mais-card">
+          <div class="mais-card-title">Meios de formação</div>
+          <div class="mais-card-desc">Retiro, recolhimento, círculo. Botão "marcar próxima formação". Próxima formação em destaque, lista dos já realizados.</div>
+        </div>
+        <div class="mais-card">
+          <div class="mais-card-title">Relatórios</div>
+          <div class="mais-card-desc">Geração de PDF. Hoje como stub "em breve" — lógica completa é etapa futura do roadmap.</div>
+        </div>
+        <div class="mais-card" style="grid-column:span 2">
+          <div class="mais-card-title">Configurações</div>
+          <div class="mais-card-desc">Conta · Notificações por prática · Privacidade (biometria/PIN) · Dados (exportar, excluir conta) — hoje como stub, detalhamento é etapa futura.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="screen">
+    <div class="screen-header-bar">
+      <span class="screen-number">06</span>
+      <span class="screen-title">Luta — visão semanal</span>
+    </div>
+    <div class="screen-body">
+      <div class="screen-purpose">Acessível a partir do card "Luta atual". Quadro comparativo do Exame Particular de Santo Inácio — semana corrente vs. semana anterior.</div>
+      <ul class="el-list">
+        <li>Status: consegui / lutei e caí / nem lutei / sem registro</li>
+        <li>Contagem simples por status, sem percentual</li>
+        <li>Nunca há veredito automático do app ("melhorou" / "piorou") — só os números, para o próprio usuário concluir</li>
+      </ul>
+    </div>
+  </div>
+
+  
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-label">Convenções Globais</div>
+    <div class="section-divider-line"></div>
+  </div>
+
+  <div class="conventions-section">
+    <div class="conventions-header">Convenções globais do app</div>
+    <div class="conv-item"><span class="conv-icon">¶</span><span>Toda lista agrupada usa cabeçalho "<strong class="pilcrow">¶ categoria</strong>" (<code style="background:#f5f4f0;padding:1px 5px;border-radius:3px;font-size:12px">SectionPilcrow</code>), nunca ícone ou emoji</span></div>
+    <div class="conv-item"><span class="conv-icon">◈</span><span>Nenhuma cor além da <span style="color:#B23A2E;font-weight:600">rubrica</span> é usada como acento — o resto do app é neutro (<code style="background:#f5f4f0;padding:1px 5px;border-radius:3px;font-size:12px">AppColors</code> base)</span></div>
+    <div class="conv-item"><span class="conv-icon">—</span><span>Ações de uma linha (concluir, adicionar) são texto na cor rubrica, não botão sólido preenchido</span></div>
+    <div class="conv-item"><span class="conv-icon">◈</span><span>Barra de progresso: sempre 2 px, preenchimento rubrica — aparece só em fidelidade de práticas e progresso de leitura. <strong>Nunca</strong> em virtude ou luta</span></div>
+    <div class="conv-item"><span class="conv-icon">—</span><span>Formulários de compromisso (nova prática, novo livro, registrar direção, marcar formação) abrem como <strong>tela própria</strong> — nunca modal ou bottom sheet</span></div>
+    <div class="conv-item"><span class="conv-icon">◈</span><span>Nenhuma tela trava por dependência de feature ainda não implementada — omite a linha/seção com segurança</span></div>
+  </div>
+
+  <div class="footer">Made with IBM Bob</div>
+</div>
+</body>
+</html>

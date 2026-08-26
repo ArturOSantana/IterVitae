@@ -1,0 +1,412 @@
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Iter Vitae — Layout das Telas</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2328;
+    background: #ffffff;
+    padding: 32px 16px 48px;
+  }
+  .wrapper { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 32px; }
+
+  h2 { font-size: 15px; font-weight: 700; margin: 28px 0 12px; color: #1f2328;
+       border-left: 3px solid #3b82d4; padding-left: 10px; }
+  h3 { font-size: 13px; font-weight: 700; color: #57606a; text-transform: uppercase;
+       letter-spacing: 0.6px; margin: 16px 0 6px; }
+
+  /* Nav overview */
+  .nav-bar {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 20px;
+    font-size: 13px; font-weight: 500;
+    border: 1px solid #e5e7eb;
+    background: #f7f8fa;
+  }
+  .nav-item.active { background: #3b82d4; color: #fff; border-color: #3b82d4; }
+  .nav-item.stub { color: #adb5bd; border-style: dashed; }
+
+  /* Screen cards */
+  .screen-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .screen-header {
+    padding: 12px 16px;
+    background: #f7f8fa;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .screen-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    padding: 2px 8px; border-radius: 10px;
+    text-transform: uppercase;
+  }
+  .tag-screen { background: #dbeafe; color: #1e40af; }
+  .tag-modal  { background: #fef9c3; color: #92400e; }
+  .tag-stub   { background: #f3f4f6; color: #9ca3af; }
+  .screen-title { font-weight: 700; font-size: 15px; }
+  .screen-route { font-size: 12px; color: #57606a; font-family: monospace; margin-left: auto; }
+  .screen-body { padding: 14px 16px; }
+
+  /* Widget tree */
+  .tree { list-style: none; }
+  .tree li { padding: 3px 0; }
+  .tree li::before { content: "›  "; color: #adb5bd; }
+  .tree li.l1::before { content: ""; margin-left: 0; }
+  .tree li.l2 { margin-left: 16px; }
+  .tree li.l3 { margin-left: 32px; }
+  .tree li.l4 { margin-left: 48px; }
+
+  .chip {
+    display: inline-block; font-size: 11px; padding: 1px 7px;
+    border-radius: 8px; margin-left: 4px; vertical-align: middle; font-weight: 600;
+  }
+  .chip-cond  { background: #fce7f3; color: #9d174d; }   /* condicional */
+  .chip-anim  { background: #d1fae5; color: #065f46; }   /* animado */
+  .chip-state { background: #ede9fe; color: #5b21b6; }   /* stateful */
+  .chip-empty { background: #f3f4f6; color: #6b7280; }   /* empty state */
+
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 13px; }
+  thead th { text-align: left; padding: 6px 8px; background: #f7f8fa;
+             border-bottom: 2px solid #e5e7eb; font-weight: 700; }
+  tbody td { padding: 5px 8px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; padding: 1px 6px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+  .badge-green  { background: #d1fae5; color: #065f46; }
+  .badge-yellow { background: #fef9c3; color: #92400e; }
+  .badge-blue   { background: #dbeafe; color: #1e40af; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .badge-red    { background: #fee2e2; color: #991b1b; }
+
+  .note { background: #f0f9ff; border-left: 3px solid #3b82d4; padding: 8px 12px;
+          border-radius: 0 6px 6px 0; font-size: 12.5px; color: #374151; margin-top: 10px; }
+
+  .divider { height: 1px; background: #e5e7eb; margin: 24px 0; }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e5e7eb;
+           text-align: center; font-size: 12px; color: #9ca3af; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <h1>Iter Vitae — Layout das Telas</h1>
+  <p class="subtitle">Mapa completo da estrutura visual do app Flutter · gerado em agosto 2025</p>
+
+  
+  <h2>Navegação Principal (AppShell)</h2>
+  <p style="font-size:13px;color:#57606a;margin-bottom:10px">
+    Shell responsiva: <strong>BottomNavigationBar</strong> em mobile (&lt; 600 px) e
+    <strong>NavigationRail</strong> em tablet/desktop (≥ 600 px). Gerenciado via <code>GoRouter</code>.
+  </p>
+  <div class="nav-bar">
+    <div class="nav-item active">🏠 Hoje <code style="font-size:11px;opacity:.8">/hoje</code></div>
+    <div class="nav-item">📖 Plano <code style="font-size:11px;opacity:.7">/regra-de-vida</code></div>
+    <div class="nav-item stub">📚 Leituras <code style="font-size:11px">/leituras</code></div>
+    <div class="nav-item">❤ Direção <code style="font-size:11px;opacity:.7">/direcao</code></div>
+    <div class="nav-item stub">⋯ Mais <code style="font-size:11px">/mais</code></div>
+  </div>
+  <div class="note">Destinos em cinza tracejado são stubs (tela placeholder) ainda não implementados.</div>
+
+  <div class="divider"></div>
+
+  
+  <div class="screen-card">
+    <div class="screen-header">
+      <span class="screen-tag tag-screen">Tela</span>
+      <span class="screen-title">Hoje</span>
+      <span class="screen-route">/hoje · HojeScreen</span>
+    </div>
+    <div class="screen-body">
+      <h3>Estrutura visual (ordem de cima para baixo)</h3>
+      <ul class="tree">
+        <li class="l1"><strong>AppBar</strong></li>
+        <li class="l2"><em>_DateHeader</em> — título "Meu caminho hoje" + data formatada em pt_BR</li>
+        <li class="l2">Ação: <code>Icons.more_vert</code> (sem função no MVP)</li>
+
+        <li class="l1" style="margin-top:8px"><strong>Body</strong></li>
+        <li class="l2"><span class="chip chip-empty">empty</span> Se não há práticas → <em>_EmptyState</em> (ícone + texto + instrução)</li>
+        <li class="l2"><strong>ListView</strong> (padding 16/8/16/32) com os itens abaixo:</li>
+        <li class="l3"><strong>ProgressCard</strong> <span class="chip chip-anim">animado</span></li>
+        <li class="l4">Título "Meu dia" / "Dia completo! ✓" (muda de cor quando 100%)</li>
+        <li class="l4">Contador X / Y práticas</li>
+        <li class="l4">Barra de progresso animada (600 ms, easeOut)</li>
+        <li class="l4">Mensagem de encorajamento quando completo</li>
+        <li class="l3"><strong>StruggleCard</strong> <span class="chip chip-cond">se luta ativa</span></li>
+        <li class="l4">Label "Minha luta" com ícone escudo</li>
+        <li class="l4">Título da luta</li>
+        <li class="l4">3 botões em linha: Consegui · Lutei e caí · Não lutei</li>
+        <li class="l4">Cada botão: ícone + label, cor muda quando ativo, borda animada (200 ms)</li>
+        <li class="l3">Label de seção "PRÁTICAS DE HOJE"</li>
+        <li class="l3"><strong>Card</strong> com lista de práticas</li>
+        <li class="l4"><strong>PracticeListItem</strong> × N (separados por Divider)</li>
+        <li class="l4" style="padding-left:64px">Barra lateral de cor da categoria (3 px)</li>
+        <li class="l4" style="padding-left:64px">Emoji (22 px)</li>
+        <li class="l4" style="padding-left:64px">Nome + horário programado</li>
+        <li class="l4" style="padding-left:64px">Ícone de status: ○ pendente / ✓ concluído (AnimatedSwitcher 250 ms)</li>
+        <li class="l4" style="padding-left:64px">Texto riscado quando concluído</li>
+        <li class="l3"><strong>VirtueBanner</strong> <span class="chip chip-cond">se virtude do mês</span></li>
+        <li class="l4">Ícone + label "Virtude do mês" em cor spiritual</li>
+        <li class="l4">Nome da virtude (negrito, cor spiritual)</li>
+        <li class="l4">Propósito em itálico</li>
+        <li class="l3">Label de seção "EXAME RÁPIDO DO DIA"</li>
+        <li class="l3"><strong>ReflectionInput</strong> <span class="chip chip-state">stateful</span></li>
+        <li class="l4">Ícone + título "Como foi meu dia?"</li>
+        <li class="l4">TextField (3–6 linhas)</li>
+        <li class="l4">Botão "Salvar reflexão" (ativo somente se texto mudou)</li>
+        <li class="l4">Confirmação "Reflexão salva." quando já registrada</li>
+        <li class="l4">Campo desabilitado se reflexão já foi salva hoje</li>
+      </ul>
+    </div>
+  </div>
+
+  
+  <div class="screen-card">
+    <div class="screen-header">
+      <span class="screen-tag tag-screen">Tela</span>
+      <span class="screen-title">Regra de Vida</span>
+      <span class="screen-route">/regra-de-vida · LifePlanScreen</span>
+    </div>
+    <div class="screen-body">
+      <h3>Estrutura visual</h3>
+      <ul class="tree">
+        <li class="l1"><strong>AppBar</strong> — título "Regra de Vida"</li>
+        <li class="l1"><strong>Body</strong></li>
+        <li class="l2"><span class="chip chip-empty">empty</span> <em>_EmptyState</em> — ícone + texto + botão "Nova prática"</li>
+        <li class="l2"><strong>ListView</strong> agrupada por categoria:</li>
+        <li class="l3"><strong>_CategoryHeader</strong> por grupo (cor específica por categoria)</li>
+        <li class="l3"><strong>_PracticeRow</strong> × N</li>
+        <li class="l4">Emoji (20 px) · Nome · Horário + frequência resumida</li>
+        <li class="l4">Botão <code>Icons.more_vert</code> → ModalBottomSheet</li>
+        <li class="l4" style="padding-left:64px">Opção "Editar" (abre PracticeFormScreen)</li>
+        <li class="l4" style="padding-left:64px">Opção "Desativar" (em vermelho, confirma via AlertDialog)</li>
+        <li class="l1"><strong>BottomNavigationBar</strong> sobreposto</li>
+        <li class="l2"><em>_AddButton</em> — OutlinedButton "Nova prática" (altura 48 px)</li>
+      </ul>
+      <h3>Cores por categoria</h3>
+      <table>
+        <thead><tr><th>Categoria</th><th>Cor</th></tr></thead>
+        <tbody>
+          <tr><td>Espiritual</td><td><span class="badge badge-purple">AppColors.spiritual</span></td></tr>
+          <tr><td>Humana</td><td><span class="badge badge-green">AppColors.human</span></td></tr>
+          <tr><td>Profissional</td><td><span class="badge badge-blue">AppColors.professional</span></td></tr>
+          <tr><td>Cultural</td><td><span class="badge badge-yellow">AppColors.cultural</span></td></tr>
+          <tr><td>Apostolado</td><td><span class="badge badge-red">AppColors.apostolate</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  
+  <div class="screen-card">
+    <div class="screen-header">
+      <span class="screen-tag tag-modal">Tela modal</span>
+      <span class="screen-title">Nova / Editar Prática</span>
+      <span class="screen-route">Navigator.push · PracticeFormScreen</span>
+    </div>
+    <div class="screen-body">
+      <h3>Estrutura visual (ListView com Form)</h3>
+      <ul class="tree">
+        <li class="l1"><strong>AppBar</strong> — "Nova prática" / "Editar prática" · Ação "Salvar" (TextButton)</li>
+        <li class="l1"><strong>Body</strong> — Form com ListView</li>
+        <li class="l2"><span class="chip chip-cond">só edição</span> Banner de aviso (fundo amarelo) "Alterações valem a partir de hoje"</li>
+        <li class="l2">Linha: Seletor de emoji (tap abre AlertDialog) + Campo "Nome" (TextFormField)</li>
+        <li class="l2">Seção <strong>CATEGORIA</strong></li>
+        <li class="l3">_SegmentedChoice com ChoiceChips: Espiritual · Humana · Profissional · Cultural · Apostolado</li>
+        <li class="l2">Seção <strong>TIPO</strong></li>
+        <li class="l3">_SegmentedChoice: Contemplativa · Ativa · Formativa</li>
+        <li class="l3">Subtítulo explicativo do tipo</li>
+        <li class="l2">Seção <strong>HORÁRIO</strong></li>
+        <li class="l3">Container tappable (abre TimePicker nativo) com ícone + hora formatada</li>
+        <li class="l2">Seção <strong>FREQUÊNCIA</strong></li>
+        <li class="l3">_SegmentedChoice: Todos os dias · Dias específicos</li>
+        <li class="l3"><span class="chip chip-cond">se "Dias específicos"</span> _WeekdayPicker — FilterChips Seg·Ter·Qua·Qui·Sex·Sáb·Dom</li>
+      </ul>
+    </div>
+  </div>
+
+  
+  <div class="screen-card">
+    <div class="screen-header">
+      <span class="screen-tag tag-screen">Tela</span>
+      <span class="screen-title">Preparação para a Direção Espiritual</span>
+      <span class="screen-route">/direcao · DirectionScreen</span>
+    </div>
+    <div class="screen-body">
+      <h3>Estrutura visual (ListView)</h3>
+      <ul class="tree">
+        <li class="l1"><strong>AppBar</strong></li>
+        <li class="l2">Título "Preparação para a Direção"</li>
+        <li class="l2"><span class="chip chip-cond">se data informada</span> Subtítulo "Direção em X dias" (amarelo se ≤ 3 dias)</li>
+        <li class="l1"><strong>Body — ListView</strong></li>
+        <li class="l2"><em>_PeriodHeader</em> — ícone de calendário + "Período: dd/mm/yyyy → dd/mm/yyyy"</li>
+        <li class="l2">Divider</li>
+        <li class="l2"><strong>DirectionBlockA</strong> — ExpansionTile (expandido por padrão) · cor spiritual</li>
+        <li class="l3">Métrica: Fidelidade às práticas espirituais (% verde ≥ 70 / amarelo)</li>
+        <li class="l3"><span class="chip chip-cond">se luta ativa</span> Container com título da luta</li>
+        <li class="l3"><span class="chip chip-cond">se há luzes</span> Lista de luzes contemplativas</li>
+        <li class="l3">TextField livre (nota para o padre, bloco a) + botão "Salvar"</li>
+        <li class="l2">Divider</li>
+        <li class="l2"><strong>DirectionBlockB</strong> — ExpansionTile · cor professional</li>
+        <li class="l3">Fidelidade às práticas profissionais/culturais (%)</li>
+        <li class="l3">Lista de práticas do bloco (emoji + nome)</li>
+        <li class="l3">TextField livre (trabalho, estudos, leitura) + botão "Salvar"</li>
+        <li class="l2">Divider</li>
+        <li class="l2"><strong>DirectionBlockC</strong> — ExpansionTile · cor human</li>
+        <li class="l3"><span class="chip chip-cond">se há reflexões</span> Até 3 reflexões recentes (data + texto em card)</li>
+        <li class="l3">TextField livre (família, virtudes) + botão "Salvar"</li>
+        <li class="l2">Divider</li>
+        <li class="l2"><strong>_QuestionsSection</strong> — ExpansionTile (expandido por padrão)</li>
+        <li class="l3">Lista de questões com CheckboxListTile (tachado quando resolvido)</li>
+        <li class="l3">Campo + botão para adicionar nova questão</li>
+        <li class="l2">FilledButton.icon "Gerar relatório" (stub — SnackBar "em breve")</li>
+      </ul>
+    </div>
+  </div>
+
+  
+  <div class="screen-card">
+    <div class="screen-header">
+      <span class="screen-tag tag-stub">Stubs</span>
+      <span class="screen-title">Leituras &amp; Mais</span>
+      <span class="screen-route">/leituras · /mais · _StubScreen</span>
+    </div>
+    <div class="screen-body" style="color:#9ca3af;font-style:italic;font-size:13px">
+      Telas placeholder — exibem apenas o rótulo centralizado na tela. Ainda não implementadas.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  
+  <h2>Widgets Reutilizáveis / Compartilhados</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Widget</th>
+        <th>Localização</th>
+        <th>Responsabilidade</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>ProgressCard</strong></td>
+        <td>hoje/widgets/</td>
+        <td>Barra de progresso animada, muda cor em 100%</td>
+      </tr>
+      <tr>
+        <td><strong>StruggleCard</strong></td>
+        <td>hoje/widgets/</td>
+        <td>3 botões de status para luta espiritual diária</td>
+      </tr>
+      <tr>
+        <td><strong>PracticeListItem</strong></td>
+        <td>hoje/widgets/</td>
+        <td>Item de prática com barra de categoria e status animado</td>
+      </tr>
+      <tr>
+        <td><strong>VirtueBanner</strong></td>
+        <td>hoje/widgets/</td>
+        <td>Banner da virtude do mês</td>
+      </tr>
+      <tr>
+        <td><strong>ReflectionInput</strong></td>
+        <td>hoje/widgets/</td>
+        <td>Campo de reflexão noturna com estado de "já salvo"</td>
+      </tr>
+      <tr>
+        <td><strong>DirectionBlockA/B/C</strong></td>
+        <td>direction/widgets/</td>
+        <td>Blocos expansíveis com métricas + nota livre para direção espiritual</td>
+      </tr>
+      <tr>
+        <td><strong>_SegmentedChoice&lt;T&gt;</strong></td>
+        <td>life_plan/ (local)</td>
+        <td>ChoiceChips genéricos para seleção única</td>
+      </tr>
+      <tr>
+        <td><strong>_WeekdayPicker</strong></td>
+        <td>life_plan/ (local)</td>
+        <td>FilterChips de dias da semana (Seg–Dom)</td>
+      </tr>
+      <tr>
+        <td><strong>AppShell</strong></td>
+        <td>core/shell/</td>
+        <td>Shell responsiva: BottomNav ↔ NavigationRail</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="divider"></div>
+
+  
+  <h2>Estados Especiais por Tela</h2>
+  <table>
+    <thead>
+      <tr><th>Tela</th><th>Estado</th><th>Comportamento</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Hoje</td>
+        <td><span class="badge badge-yellow">isEmpty</span></td>
+        <td><em>_EmptyState</em> — instrução para configurar práticas</td>
+      </tr>
+      <tr>
+        <td>Hoje</td>
+        <td><span class="badge badge-green">isAllComplete</span></td>
+        <td>ProgressCard muda para cor verde e exibe mensagem de encorajamento</td>
+      </tr>
+      <tr>
+        <td>Hoje</td>
+        <td><span class="badge badge-blue">loading</span></td>
+        <td>CircularProgressIndicator centralizado</td>
+      </tr>
+      <tr>
+        <td>Hoje</td>
+        <td><span class="badge badge-red">error</span></td>
+        <td>Texto genérico de erro (sem stack trace exposto)</td>
+      </tr>
+      <tr>
+        <td>Regra de Vida</td>
+        <td><span class="badge badge-yellow">grouped.isEmpty</span></td>
+        <td><em>_EmptyState</em> com botão "Nova prática"</td>
+      </tr>
+      <tr>
+        <td>Direção</td>
+        <td><span class="badge badge-yellow">days ≤ 3</span></td>
+        <td>Subtítulo da AppBar fica em cor warning (amarelo)</td>
+      </tr>
+      <tr>
+        <td>Direção</td>
+        <td><span class="badge badge-yellow">days == 0</span></td>
+        <td>Subtítulo muda para "Direção hoje"</td>
+      </tr>
+      <tr>
+        <td>Formulário</td>
+        <td><span class="badge badge-yellow">isEditing</span></td>
+        <td>Banner de aviso amarelo + título "Editar prática"</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<footer>
+  <p>Made with IBM Bob</p>
+</footer>
+</body>
+</html>
