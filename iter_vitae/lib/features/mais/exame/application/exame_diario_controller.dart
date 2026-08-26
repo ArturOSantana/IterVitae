@@ -82,8 +82,8 @@ class ExameDiarioController extends AsyncNotifier<ExameDiarioState> {
   @override
   Future<ExameDiarioState> build() async {
     final today = DateTime.now();
-    final practiceRepo = ref.watch(practiceRepositoryProvider);
-    final exameRepo = ref.watch(exameDiarioRepositoryProvider);
+    final practiceRepo = ref.read(practiceRepositoryProvider);
+    final exameRepo = ref.read(exameDiarioRepositoryProvider);
 
     // Carrega práticas ativas e seus logs de hoje
     final practices = await practiceRepo.getActivePractices();
@@ -166,7 +166,7 @@ DateTime startOfWeekFor(DateTime date) {
 /// Retorna uma lista de 7 posições (uma por dia); dias sem registro → null.
 final exameDiarioSemanaProvider =
     FutureProvider<List<ExameDiario?>>((ref) async {
-  final repo = ref.watch(exameDiarioRepositoryProvider);
+  final repo = ref.read(exameDiarioRepositoryProvider);
   final start = startOfWeekFor(DateTime.now());
   final records = await repo.getWeek(start);
 

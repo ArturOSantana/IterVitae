@@ -7,7 +7,7 @@ import 'readings_state.dart';
 class ReadingsController extends AsyncNotifier<ReadingsState> {
   @override
   Future<ReadingsState> build() async {
-    final books = await ref.watch(bookRepositoryProvider).getAll();
+    final books = await ref.read(bookRepositoryProvider).getAll();
     return ReadingsState(books: books);
   }
 

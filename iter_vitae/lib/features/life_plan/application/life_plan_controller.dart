@@ -8,7 +8,7 @@ import 'life_plan_state.dart';
 class LifePlanController extends AsyncNotifier<LifePlanState> {
   @override
   Future<LifePlanState> build() async {
-    final repo = ref.watch(practiceRepositoryProvider);
+    final repo = ref.read(practiceRepositoryProvider);
     final practices = await repo.getAllPractices();
     return LifePlanState(practices: practices);
   }

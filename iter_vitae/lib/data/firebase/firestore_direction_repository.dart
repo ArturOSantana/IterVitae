@@ -34,7 +34,7 @@ class FirestoreDirectionRepository implements DirectionRepository {
   }
 
   @override
-  Future<SpiritualDirection> getOrCreateNext() async {
+  Future<SpiritualDirection?> getNext() async {
     final today = DateTime.now();
     final today0 = DateTime(today.year, today.month, today.day);
     final snap = await _col
@@ -42,8 +42,17 @@ class FirestoreDirectionRepository implements DirectionRepository {
         .orderBy('date')
         .limit(1)
         .get();
-    if (snap.docs.isNotEmpty) return _fromDoc(snap.docs.first);
+    if (snap.docs.isEmpty) return null;
+    return _fromDoc(snap.docs.first);
+  }
 
+  @override
+  Future<SpiritualDirection> getOrCreateNext() async {
+    final existing = await getNext();
+    if (existing != null) return existing;
+
+    final today = DateTime.now();
+    final today0 = DateTime(today.year, today.month, today.day);
     // Cria nova direção em branco 30 dias à frente
     final newRef = _col.doc();
     final newDir = SpiritualDirection(

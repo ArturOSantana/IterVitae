@@ -50,7 +50,7 @@ class InMemoryDirectionRepository implements DirectionRepository {
   }
 
   @override
-  Future<SpiritualDirection> getOrCreateNext() async {
+  Future<SpiritualDirection?> getNext() async {
     final today = DateTime.now();
     final today0 = DateTime(today.year, today.month, today.day);
 
@@ -59,8 +59,15 @@ class InMemoryDirectionRepository implements DirectionRepository {
         .toList()
       ..sort((a, b) => a.date.compareTo(b.date));
 
-    if (futures.isNotEmpty) return futures.first;
+    return futures.isEmpty ? null : futures.first;
+  }
 
+  @override
+  Future<SpiritualDirection> getOrCreateNext() async {
+    final existing = await getNext();
+    if (existing != null) return existing;
+
+    final today = DateTime.now();
     // Não existe próxima direção — cria uma em branco
     final newDirection = SpiritualDirection(
       id: 'dir_${today.millisecondsSinceEpoch}',

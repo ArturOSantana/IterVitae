@@ -10,11 +10,11 @@ import 'package:iter_vitae/providers.dart';
 
 /// Provider local para a lista de [MeioFormacao].
 final _meiosProvider = FutureProvider.autoDispose<List<MeioFormacao>>(
-  (ref) => ref.watch(meioFormacaoRepositoryProvider).getAll(),
+  (ref) => ref.read(meioFormacaoRepositoryProvider).getAll(),
 );
 
 final _proximoProvider = FutureProvider.autoDispose<MeioFormacao?>(
-  (ref) => ref.watch(meioFormacaoRepositoryProvider).getProximo(),
+  (ref) => ref.read(meioFormacaoRepositoryProvider).getProximo(),
 );
 
 /// Tela Meios de formação.

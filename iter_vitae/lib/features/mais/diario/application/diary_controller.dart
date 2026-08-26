@@ -24,7 +24,7 @@ class DiaryState {
 class DiaryController extends AsyncNotifier<DiaryState> {
   @override
   Future<DiaryState> build() async {
-    final entries = await ref.watch(diaryRepositoryProvider).getAll();
+    final entries = await ref.read(diaryRepositoryProvider).getAll();
     return DiaryState(entries: entries);
   }
 

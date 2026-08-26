@@ -52,7 +52,7 @@ class ExameConfissaoState {
 class ExameConfissaoController extends AsyncNotifier<ExameConfissaoState> {
   @override
   Future<ExameConfissaoState> build() async {
-    final repo = ref.watch(exameConfissaoRepositoryProvider);
+    final repo = ref.read(exameConfissaoRepositoryProvider);
     final catalogo = await repo.getCatalogo();
     final sessaoExistente = await repo.getSessaoAtiva();
     final sessao = sessaoExistente ??

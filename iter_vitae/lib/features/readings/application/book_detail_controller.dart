@@ -10,10 +10,10 @@ class BookDetailController
     extends FamilyAsyncNotifier<BookDetailState, String> {
   @override
   Future<BookDetailState> build(String bookId) async {
-    final books = await ref.watch(bookRepositoryProvider).getAll();
+    final books = await ref.read(bookRepositoryProvider).getAll();
     final book = books.firstWhere((b) => b.id == bookId);
     final sessions =
-        await ref.watch(readingSessionRepositoryProvider).getForBook(bookId);
+        await ref.read(readingSessionRepositoryProvider).getForBook(bookId);
     return BookDetailState(book: book, sessions: sessions);
   }
 

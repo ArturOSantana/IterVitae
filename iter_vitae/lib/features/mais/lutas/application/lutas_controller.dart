@@ -25,7 +25,7 @@ class LutasState {
 class LutasController extends AsyncNotifier<LutasState> {
   @override
   Future<LutasState> build() async {
-    final repo = ref.watch(struggleRepositoryProvider);
+    final repo = ref.read(struggleRepositoryProvider);
     final all = await repo.getAll();
     final active = await repo.getActive();
     return LutasState(struggles: all, active: active);

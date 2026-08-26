@@ -97,7 +97,9 @@ final enviarRelatorioDiretorProvider = AsyncNotifierProvider<
 
 /// Provider que indica se o usuário tem um diretor vinculado.
 final temDiretorVinculadoProvider = FutureProvider<bool>((ref) async {
-  final user = ref.watch(currentUserProvider).valueOrNull;
+  final uid = ref.watch(currentUserProvider.select((v) => v.valueOrNull?.uid));
+  if (uid == null) return false;
+  final user = ref.read(currentUserProvider).valueOrNull;
   if (user == null) return false;
   final doc = await FirebaseFirestore.instance
       .collection('users')

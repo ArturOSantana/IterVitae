@@ -59,69 +59,76 @@ final currentUserProvider = StreamProvider<AppUser?>(
 // A troca é automática: quando o usuário faz login, os providers são
 // invalidados e recriados com a implementação Firestore.
 
+// Extrai apenas o UID do usuário atual.
+// Usando select, os repositoryProviders só são reconstruídos quando o UID
+// muda de fato (login/logout), ignorando reemissões do stream de auth
+// causadas por renovação silenciosa de token do Firebase.
+final _currentUidProvider = Provider<String?>((ref) {
+  return ref.watch(currentUserProvider.select((v) => v.valueOrNull?.uid));
+});
+
 final practiceRepositoryProvider = Provider<PracticeRepository>((ref) {
-  final userAsync = ref.watch(currentUserProvider);
-  final uid = userAsync.valueOrNull?.uid;
+  final uid = ref.watch(_currentUidProvider);
   if (uid != null) return FirestorePracticeRepository(uid: uid);
   return InMemoryPracticeRepository();
 });
 
 final struggleRepositoryProvider = Provider<StruggleRepository>((ref) {
-  final uid = ref.watch(currentUserProvider).valueOrNull?.uid;
+  final uid = ref.watch(_currentUidProvider);
   if (uid != null) return FirestoreStruggleRepository(uid: uid);
   return InMemoryStruggleRepository();
 });
 
 final reflectionRepositoryProvider = Provider<ReflectionRepository>((ref) {
-  final uid = ref.watch(currentUserProvider).valueOrNull?.uid;
+  final uid = ref.watch(_currentUidProvider);
   if (uid != null) return FirestoreReflectionRepository(uid: uid);
   return InMemoryReflectionRepository();
 });
 
 final directionRepositoryProvider = Provider<DirectionRepository>((ref) {
-  final uid = ref.watch(currentUserProvider).valueOrNull?.uid;
+  final uid = ref.watch(_currentUidProvider);
   if (uid != null) return FirestoreDirectionRepository(uid: uid);
   return InMemoryDirectionRepository();
 });
 
 final virtueRepositoryProvider = Provider<VirtueRepository>((ref) {
-  final uid = ref.watch(currentUserProvider).valueOrNull?.uid;
+  final uid = ref.watch(_currentUidProvider);
   if (uid != null) return FirestoreVirtueRepository(uid: uid);
   return InMemoryVirtueRepository();
 });
 
 final bookRepositoryProvider = Provider<BookRepository>((ref) {
-  final uid = ref.watch(currentUserProvider).valueOrNull?.uid;
+  final uid = ref.watch(_currentUidProvider);
   if (uid != null) return FirestoreBookRepository(uid: uid);
   return InMemoryBookRepository();
 });
 
 final readingSessionRepositoryProvider = Provider<ReadingSessionRepository>((ref) {
-  final uid = ref.watch(currentUserProvider).valueOrNull?.uid;
+  final uid = ref.watch(_currentUidProvider);
   if (uid != null) return FirestoreReadingSessionRepository(uid: uid);
   return InMemoryReadingSessionRepository();
 });
 
 final diaryRepositoryProvider = Provider<DiaryRepository>((ref) {
-  final uid = ref.watch(currentUserProvider).valueOrNull?.uid;
+  final uid = ref.watch(_currentUidProvider);
   if (uid != null) return FirestoreDiaryRepository(uid: uid);
   return InMemoryDiaryRepository();
 });
 
 final exameDiarioRepositoryProvider = Provider<ExameDiarioRepository>((ref) {
-  final uid = ref.watch(currentUserProvider).valueOrNull?.uid;
+  final uid = ref.watch(_currentUidProvider);
   if (uid != null) return FirestoreExameDiarioRepository(uid: uid);
   return InMemoryExameDiarioRepository();
 });
 
 final exameConfissaoRepositoryProvider = Provider<ExameConfissaoRepository>((ref) {
-  final uid = ref.watch(currentUserProvider).valueOrNull?.uid;
+  final uid = ref.watch(_currentUidProvider);
   if (uid != null) return FirestoreExameConfissaoRepository(uid: uid);
   return InMemoryExameConfissaoRepository();
 });
 
 final meioFormacaoRepositoryProvider = Provider<MeioFormacaoRepository>((ref) {
-  final uid = ref.watch(currentUserProvider).valueOrNull?.uid;
+  final uid = ref.watch(_currentUidProvider);
   if (uid != null) return FirestoreMeioFormacaoRepository(uid: uid);
   return InMemoryMeioFormacaoRepository();
 });

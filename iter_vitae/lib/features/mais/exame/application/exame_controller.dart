@@ -76,7 +76,7 @@ class ExameController extends AsyncNotifier<ExameState> {
   @override
   Future<ExameState> build() async {
     final today = DateTime.now();
-    final existing = await ref.watch(reflectionRepositoryProvider).getForDate(today);
+    final existing = await ref.read(reflectionRepositoryProvider).getForDate(today);
     if (existing == null) {
       return ExameState(date: today);
     }

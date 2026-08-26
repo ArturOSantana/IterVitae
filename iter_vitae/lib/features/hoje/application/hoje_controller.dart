@@ -15,11 +15,9 @@ class HojeController extends AsyncNotifier<HojeState> {
   @override
   Future<HojeState> build() async {
     final today = DateTime.now();
-    // Usar ref.watch para que o controller seja reconstruído automaticamente
-    // quando o usuário faz login e os repositórios trocam de InMemory → Firestore.
-    final practiceRepo = ref.watch(practiceRepositoryProvider);
-    final struggleRepo = ref.watch(struggleRepositoryProvider);
-    final virtueRepo = ref.watch(virtueRepositoryProvider);
+    final practiceRepo = ref.read(practiceRepositoryProvider);
+    final struggleRepo = ref.read(struggleRepositoryProvider);
+    final virtueRepo = ref.read(virtueRepositoryProvider);
 
     final allActive = await practiceRepo.getActivePractices();
 

@@ -25,7 +25,7 @@ class VirtudesState {
 class VirtudesController extends AsyncNotifier<VirtudesState> {
   @override
   Future<VirtudesState> build() async {
-    final repo = ref.watch(virtueRepositoryProvider);
+    final repo = ref.read(virtueRepositoryProvider);
     final all = await repo.getAll();
     final current = await repo.getActiveVirtue();
     return VirtudesState(virtues: all, current: current);

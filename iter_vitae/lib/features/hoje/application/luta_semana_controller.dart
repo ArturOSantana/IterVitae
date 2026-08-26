@@ -70,7 +70,7 @@ LutaSemanaResumo _buildResumo(Struggle struggle, DateTime startOfWeek) {
 /// Carrega a luta ativa e monta o quadro comparativo das duas semanas.
 /// Retorna null quando não há luta ativa.
 final lutaSemanaProvider = FutureProvider<LutaSemanaState?>((ref) async {
-  final struggle = await ref.watch(struggleRepositoryProvider).getActive();
+  final struggle = await ref.read(struggleRepositoryProvider).getActive();
   if (struggle == null) return null;
 
   final hoje = DateTime.now();

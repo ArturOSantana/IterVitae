@@ -8,7 +8,7 @@ class DirectionHistoryController
     extends AsyncNotifier<List<SpiritualDirection>> {
   @override
   Future<List<SpiritualDirection>> build() async {
-    final repo = ref.watch(directionRepositoryProvider);
+    final repo = ref.read(directionRepositoryProvider);
     final all = await repo.getAll();
 
     final today = DateTime.now();

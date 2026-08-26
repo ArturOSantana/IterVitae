@@ -178,11 +178,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 });
 
 /// Notifica o GoRouter quando o estado de auth muda.
+/// Usa select para reagir apenas a mudanças de UID (login/logout),
+/// ignorando reemissões do stream causadas por renovação de token.
 class _AuthListenable extends ChangeNotifier {
   _AuthListenable(Ref ref) {
-    ref.listen<AsyncValue>(currentUserProvider, (prev, next) {
-      notifyListeners();
-    });
+    ref.listen<String?>(
+      currentUserProvider.select((v) => v.valueOrNull?.uid),
+      (prev, next) {
+        if (prev != next) notifyListeners();
+      },
+    );
   }
 }
 

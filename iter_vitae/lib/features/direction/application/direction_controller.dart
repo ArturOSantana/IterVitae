@@ -13,12 +13,12 @@ import 'direction_state.dart';
 class DirectionController extends AsyncNotifier<DirectionState> {
   @override
   Future<DirectionState> build() async {
-    final directionRepo = ref.watch(directionRepositoryProvider);
-    final practiceRepo = ref.watch(practiceRepositoryProvider);
-    final struggleRepo = ref.watch(struggleRepositoryProvider);
-    final reflectionRepo = ref.watch(reflectionRepositoryProvider);
-    final bookRepo = ref.watch(bookRepositoryProvider);
-    final sessionRepo = ref.watch(readingSessionRepositoryProvider);
+    final directionRepo = ref.read(directionRepositoryProvider);
+    final practiceRepo = ref.read(practiceRepositoryProvider);
+    final struggleRepo = ref.read(struggleRepositoryProvider);
+    final reflectionRepo = ref.read(reflectionRepositoryProvider);
+    final bookRepo = ref.read(bookRepositoryProvider);
+    final sessionRepo = ref.read(readingSessionRepositoryProvider);
 
     final today = DateTime.now();
     final today0 = DateTime(today.year, today.month, today.day);
@@ -33,8 +33,15 @@ class DirectionController extends AsyncNotifier<DirectionState> {
           )
         : today0.subtract(const Duration(days: 45)); // fallback: user.createdAt
 
-    // Direção ativa: próxima futura (ou nova criada automaticamente)
-    final activeDirection = await directionRepo.getOrCreateNext();
+    // Direção ativa: próxima futura — usa getNext() (só leitura) para não
+    // gerar escrita no Firestore durante o build. Se não existe nenhuma,
+    // usa um placeholder local; a criação real acontece via getOrCreateNext()
+    // somente quando o usuário interagir (ex.: salvar nota, abrir RegisterDirection).
+    final activeDirection = await directionRepo.getNext() ??
+        SpiritualDirection(
+          id: '',
+          date: today0.add(const Duration(days: 30)),
+        );
 
     // periodTo é a data da próxima sessão marcada (ou hoje, o que vier primeiro).
     // Isso garante que o relatório e os blocos cobrem exatamente o intervalo
@@ -131,6 +138,19 @@ class DirectionController extends AsyncNotifier<DirectionState> {
     );
   }
 
+  // ── Helpers ────────────────────────────────────────────────────────────
+
+  /// Garante que a direção ativa existe no repositório.
+  /// Se o build usou um placeholder (id == ''), cria a direção real agora.
+  Future<SpiritualDirection> _resolveActiveDirection(
+      DirectionState current) async {
+    if (current.activeDirection.id.isNotEmpty) return current.activeDirection;
+    final repo = ref.read(directionRepositoryProvider);
+    final real = await repo.getOrCreateNext();
+    state = AsyncData(current.copyWith(activeDirection: real));
+    return real;
+  }
+
   // ── Notas de preparação ────────────────────────────────────────────────
 
   /// Salva nota em um dos blocos (a, b ou c) na direção ativa.
@@ -138,17 +158,19 @@ class DirectionController extends AsyncNotifier<DirectionState> {
     final current = state.valueOrNull;
     if (current == null) return;
 
-    final notes = current.notes;
+    final base = await _resolveActiveDirection(current);
+
     final updatedNotes = switch (block) {
-      'a' => notes.copyWith(a: text),
-      'b' => notes.copyWith(b: text),
-      'c' => notes.copyWith(c: text),
-      _ => notes,
+      'a' => base.notasPreparacao.copyWith(a: text),
+      'b' => base.notasPreparacao.copyWith(b: text),
+      'c' => base.notasPreparacao.copyWith(c: text),
+      _ => base.notasPreparacao,
     };
 
-    final updatedDirection =
-        current.activeDirection.copyWith(notasPreparacao: updatedNotes);
-    state = AsyncData(current.copyWith(activeDirection: updatedDirection));
+    final updatedDirection = base.copyWith(notasPreparacao: updatedNotes);
+    final updatedState = (state.valueOrNull ?? current)
+        .copyWith(activeDirection: updatedDirection);
+    state = AsyncData(updatedState);
 
     try {
       await ref.read(directionRepositoryProvider).save(updatedDirection);
@@ -165,14 +187,17 @@ class DirectionController extends AsyncNotifier<DirectionState> {
     final current = state.valueOrNull;
     if (current == null) return;
 
+    final base = await _resolveActiveDirection(current);
+
     final question = DirectionQuestion(
       id: 'q_${DateTime.now().millisecondsSinceEpoch}',
       text: text.trim(),
     );
-    final updatedQuestions = [...current.questions, question];
     final updatedDirection =
-        current.activeDirection.copyWith(questions: updatedQuestions);
-    state = AsyncData(current.copyWith(activeDirection: updatedDirection));
+        base.copyWith(questions: [...base.questions, question]);
+    final updatedState = (state.valueOrNull ?? current)
+        .copyWith(activeDirection: updatedDirection);
+    state = AsyncData(updatedState);
 
     try {
       await ref.read(directionRepositoryProvider).save(updatedDirection);
@@ -186,13 +211,16 @@ class DirectionController extends AsyncNotifier<DirectionState> {
     final current = state.valueOrNull;
     if (current == null) return;
 
-    final updatedQuestions = current.questions.map((q) {
+    final base = await _resolveActiveDirection(current);
+
+    final updatedQuestions = base.questions.map((q) {
       return q.id == questionId ? q.copyWith(resolved: !q.resolved) : q;
     }).toList();
 
-    final updatedDirection =
-        current.activeDirection.copyWith(questions: updatedQuestions);
-    state = AsyncData(current.copyWith(activeDirection: updatedDirection));
+    final updatedDirection = base.copyWith(questions: updatedQuestions);
+    final updatedState = (state.valueOrNull ?? current)
+        .copyWith(activeDirection: updatedDirection);
+    state = AsyncData(updatedState);
 
     try {
       await ref.read(directionRepositoryProvider).save(updatedDirection);

@@ -40,7 +40,7 @@ class NotificationController extends AsyncNotifier<NotificationState> {
   @override
   Future<NotificationState> build() async {
     // Observa mudanças no repositório de práticas para sincronizar
-    ref.watch(practiceRepositoryProvider);
+    ref.read(practiceRepositoryProvider);
     return const NotificationState();
   }
 
