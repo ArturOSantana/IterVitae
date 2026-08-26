@@ -1,0 +1,126 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+
+    function isDirector(directorUid) {
+      return isAuth() && request.auth.uid == directorUid;
+    }
+
+    // ── Dados pessoais do dirigido — NUNCA legíveis pelo diretor ─────────────
+    // A ausência de regra que concede permissão ao directorUid é a proteção real.
+
+    match /users/{uid} {
+      allow read, write: if isUser(uid);
+
+      // Práticas: somente o próprio usuário
+      match /practices/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
+      // Luta: somente o próprio usuário
+      match /struggles/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
+      // Reflexões diárias: somente o próprio usuário
+      match /reflections/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
+      // Direções espirituais (preparação, conteúdo): somente o próprio usuário
+      match /directions/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
+      // Diário: somente o próprio usuário
+      match /diary/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
+      // Exame diário: somente o próprio usuário
+      match /exame_diario/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
+      // Exame de confissão: somente o próprio usuário
+      match /exame_confissao/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
+      // Virtudes: somente o próprio usuário
+      match /virtues/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
+      // Livros e sessões de leitura: somente o próprio usuário
+      match /books/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
+      match /reading_sessions/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
+      // Notificações enviadas pelo diretor — o diretor escreve; o dirigido lê
+      match /notifications_from_director/{notifId} {
+        // O dirigido pode ler suas próprias notificações e marcar como lida
+        allow read, write: if isUser(uid);
+        // O diretor só pode criar (não ler, não editar, não apagar)
+        allow create: if isAuth()
+          && request.resource.data.directorUid == request.auth.uid;
+      }
+    }
+
+    // ── Perfil do diretor ────────────────────────────────────────────────────
+
+    match /directors/{directorUid} {
+      // O diretor cria/lê/atualiza seu próprio perfil
+      allow read, write: if isDirector(directorUid);
+
+      // ── Vínculos com dirigidos ───────────────────────────────────────────
+      match /directees/{directeeUid} {
+        // O dirigido ESCREVE seu próprio vínculo (apelido, data)
+        allow create, update: if isAuth() && request.auth.uid == directeeUid;
+        // O diretor LÊ (nunca escreve) os vínculos dentro do seu próprio namespace
+        allow read: if isDirector(directorUid);
+        // Nenhum diretor lê vínculos de outro diretor (coberto pela regra acima)
+
+        // ── Relatórios enviados pelo dirigido ────────────────────────────
+        match /reports/{reportId} {
+          // O dirigido envia (cria) seu próprio relatório
+          allow create: if isAuth() && request.auth.uid == directeeUid;
+          // O diretor vinculado lê
+          allow read: if isDirector(directorUid);
+        }
+      }
+    }
+
+    // ── Códigos de convite ────────────────────────────────────────────────────
+
+    match /invite_codes/{codigo} {
+      // O dirigido cria seu próprio código
+      allow create: if isAuth()
+        && request.resource.data.directeeUid == request.auth.uid
+        && request.resource.data.usado == false;
+      // O dirigido lê seu próprio código (para exibir na tela)
+      allow read: if isAuth()
+        && resource.data.directeeUid == request.auth.uid;
+      // O diretor valida e marca como usado (update apenas o campo `usado`)
+      allow update: if isAuth()
+        && resource.data.usado == false
+        && request.resource.data.usado == true
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usado']);
+    }
+  }
+}

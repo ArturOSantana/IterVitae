@@ -9,6 +9,7 @@ import 'package:iter_vitae/features/mais/calendario/application/calendar_export_
 import 'package:iter_vitae/features/mais/configuracoes/application/diretor_controller.dart';
 import 'package:iter_vitae/features/mais/configuracoes/application/notification_controller.dart';
 import 'package:iter_vitae/features/mais/configuracoes/application/notification_prefs_controller.dart';
+import 'package:iter_vitae/features/direction/application/enviar_relatorio_diretor.dart';
 import 'package:iter_vitae/providers.dart';
 
 /// Tela de Configurações — conta, diretor, notificações, exportação, sobre.
@@ -42,6 +43,8 @@ class ConfiguracoesScreen extends ConsumerWidget {
           _SectionLabel(label: 'Diretor espiritual'),
           const SizedBox(height: 8),
           _DiretorCard(ref: ref),
+          const SizedBox(height: 8),
+          const _VincularDiretorTile(),
           const SizedBox(height: 24),
 
           // ── Privacidade ────────────────────────────────────────────────
@@ -939,6 +942,49 @@ class _ActionTile extends StatelessWidget {
       trailing: trailing,
       onTap: onTap,
       dense: true,
+    );
+  }
+}
+
+/// Tile que mostra o status do vínculo com o diretor e navega para a tela
+/// de geração de código quando não há vínculo ainda.
+class _VincularDiretorTile extends ConsumerWidget {
+  const _VincularDiretorTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final temDirAsync = ref.watch(temDiretorVinculadoProvider);
+    final temDiretor = temDirAsync.valueOrNull ?? false;
+
+    return Card(
+      child: ListTile(
+        leading: Icon(
+          temDiretor ? Icons.link : Icons.link_off_outlined,
+          size: 20,
+          color: temDiretor ? AppColors.success : AppColors.textMuted,
+        ),
+        title: Text(
+          temDiretor ? 'Vinculado ao seu diretor' : 'Vincular ao meu diretor',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        subtitle: Text(
+          temDiretor
+              ? 'Vínculo ativo. Para desvincular, contate o suporte.'
+              : 'Gere um código e informe ao seu diretor espiritual.',
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: AppColors.textMuted),
+        ),
+        trailing: temDiretor
+            ? null
+            : const Icon(Icons.chevron_right,
+                size: 20, color: AppColors.textMuted),
+        onTap: temDiretor
+            ? null
+            : () => context.push('/mais/vincular-diretor'),
+        dense: true,
+      ),
     );
   }
 }

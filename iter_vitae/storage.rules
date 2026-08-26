@@ -1,0 +1,24 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Relatórios enviados pelo dirigido ao diretor ───────────────────────────
+    //
+    // Caminho: reports/{directorUid}/{directeeUid}/{reportId}
+    //
+    // Regra:
+    //   - O dirigido pode criar (upload) seu próprio relatório
+    //   - O diretor vinculado pode ler
+    //   - Nenhum outro acesso
+
+    match /reports/{directorUid}/{directeeUid}/{reportId} {
+      allow create: if request.auth != null
+        && request.auth.uid == directeeUid
+        && request.resource.size < 20 * 1024 * 1024; // máx 20 MB
+
+      allow read: if request.auth != null
+        && request.auth.uid == directorUid;
+    }
+  }
+}
