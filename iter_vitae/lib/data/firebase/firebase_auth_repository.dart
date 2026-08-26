@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../domain/entities/app_user.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -32,6 +33,14 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser> signInWithGoogle() async {
+    if (kIsWeb) {
+      final provider = GoogleAuthProvider()
+        ..addScope('email')
+        ..addScope('profile');
+      final cred = await _auth.signInWithPopup(provider);
+      return _requireUser(cred.user);
+    }
+
     final account = await _google.signIn();
     if (account == null) throw const _SignInCancelledException();
 
@@ -55,7 +64,7 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    await _google.signOut();
+    if (!kIsWeb) await _google.signOut();
     await _auth.signOut();
   }
 

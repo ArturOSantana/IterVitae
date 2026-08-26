@@ -8,9 +8,10 @@ import 'package:iter_vitae/core/widgets/section_pilcrow.dart';
 import 'package:iter_vitae/domain/entities/meio_formacao.dart';
 import 'package:iter_vitae/features/hoje/application/hoje_controller.dart';
 import 'package:iter_vitae/providers.dart';
+import 'widgets/jaculatoria_card.dart';
+import 'widgets/practice_list_item.dart';
 import 'widgets/progress_card.dart';
 import 'widgets/struggle_card.dart';
-import 'widgets/practice_list_item.dart';
 import 'widgets/virtue_banner.dart';
 
 /// Tela Hoje — dashboard diário do Iter Vitae.
@@ -66,7 +67,11 @@ class HojeScreen extends ConsumerWidget {
             : ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
                 children: [
-                  // 1. Progresso
+                  // 1. Jaculatória do dia
+                  const JaculatoriaDoDia(),
+                  const SizedBox(height: 16),
+
+                  // 2. Progresso
                   ProgressCard(
                     completed: state.completedCount,
                     total: state.totalCount,

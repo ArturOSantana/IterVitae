@@ -11,6 +11,7 @@ import 'package:iter_vitae/domain/entities/spiritual_direction.dart';
 import 'package:iter_vitae/domain/entities/struggle.dart';
 import 'package:iter_vitae/features/direction/application/direction_controller.dart';
 import 'package:iter_vitae/features/direction/application/direction_report_pdf.dart';
+import 'package:iter_vitae/features/direction/application/enviar_relatorio_diretor.dart';
 import 'package:iter_vitae/features/direction/application/direction_state.dart';
 import 'package:iter_vitae/features/direction/presentation/direction_history_screen.dart';
 import 'package:iter_vitae/features/direction/presentation/quick_note_screen.dart';
@@ -600,6 +601,7 @@ class _ReportSelectionSheetState extends State<_ReportSelectionSheet> {
   bool _diary = false; // desmarcado por padrão — dado sensível
 
   bool _generating = false;
+  bool _enviandoAoDiretor = false;
 
   @override
   Widget build(BuildContext context) {
@@ -691,8 +693,41 @@ class _ReportSelectionSheetState extends State<_ReportSelectionSheet> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text('Gerar'),
+                    : const Text('Baixar PDF'),
               ),
+            ),
+            const SizedBox(height: 8),
+            // "Enviar para o diretor" — visível apenas quando vínculo existe
+            Consumer(
+              builder: (context, ref, _) {
+                final temDirAsync = ref.watch(temDiretorVinculadoProvider);
+                final temDir = temDirAsync.valueOrNull ?? false;
+                if (!temDir) return const SizedBox.shrink();
+                return SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.rubric,
+                      side: const BorderSide(color: AppColors.rubric),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    icon: _enviandoAoDiretor
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.rubric,
+                            ),
+                          )
+                        : const Icon(Icons.send_outlined, size: 18),
+                    label: const Text('Enviar para o diretor'),
+                    onPressed: _enviandoAoDiretor || _generating
+                        ? null
+                        : () => _enviarAoDiretor(ref),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -705,7 +740,6 @@ class _ReportSelectionSheetState extends State<_ReportSelectionSheet> {
     Navigator.pop(context);
 
     try {
-      // Busca virtude ativa para incluir no relatório (opcional)
       final virtue = await widget.ref
           .read(virtueRepositoryProvider)
           .getActiveVirtue();
@@ -737,6 +771,56 @@ class _ReportSelectionSheetState extends State<_ReportSelectionSheet> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _enviarAoDiretor(WidgetRef ref) async {
+    setState(() => _enviandoAoDiretor = true);
+    Navigator.pop(context);
+
+    try {
+      final virtue = await widget.ref
+          .read(virtueRepositoryProvider)
+          .getActiveVirtue();
+
+      final options = ReportOptions(
+        incluirPraticas: _practices,
+        incluirEstatisticas: _statistics,
+        incluirVirtudes: _virtues,
+        incluirLeituras: _readings,
+        incluirQuestoes: _questions,
+        incluirDiario: _diary,
+      );
+
+      final bytes = await DirectionReportPdf.generate(
+        widget.state,
+        options: options,
+        activeVirtue: virtue,
+      );
+
+      await ref.read(enviarRelatorioDiretorProvider.notifier).enviar(
+            pdfBytes: bytes,
+            nomeArquivo: 'relatorio_direcao.pdf',
+          );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Relatório enviado ao seu diretor.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível enviar. Tente novamente.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _enviandoAoDiretor = false);
     }
   }
 }
