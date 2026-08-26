@@ -62,7 +62,7 @@ class NotificationService {
   }
 
   /// Solicita permissão ao usuário (iOS / Android 13+).
-  /// Deve ser chamado após o primeiro login, não no cold start.
+  /// Chamado no cold start, logo após [init].
   Future<bool> requestPermission() async {
     if (kIsWeb) return false;
 

@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:iter_vitae/core/calendar/icalendar_service.dart';
 import 'package:iter_vitae/core/theme/app_colors.dart';
 import 'package:iter_vitae/domain/entities/meio_formacao.dart';
 import 'package:iter_vitae/providers.dart';
+import 'package:share_plus/share_plus.dart';
 
 /// Formulário "marcar próxima formação" — tela própria (não modal).
 ///
@@ -28,6 +30,8 @@ class _MeioFormacaoFormScreenState
   late final TextEditingController _notaCtrl;
   late DateTime _data;
   bool _saving = false;
+  bool _addingToCalendar = false;
+  MeioFormacao? _savedMeio;
 
   bool get _isEdit => widget.existing != null;
 
@@ -96,9 +100,23 @@ class _MeioFormacaoFormScreenState
         nota: _notaCtrl.text.trim().isEmpty ? null : _notaCtrl.text.trim(),
       );
       await ref.read(meioFormacaoRepositoryProvider).save(meio);
-      if (mounted) context.pop(); // ignore: use_build_context_synchronously
+      if (mounted) setState(() => _savedMeio = meio);
+      if (mounted && _isEdit) context.pop(); // ignore: use_build_context_synchronously
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _adicionarAoCalendario(MeioFormacao meio) async {
+    setState(() => _addingToCalendar = true);
+    try {
+      final file = await ICalendarService().generateMeioFormacaoFile(meio);
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'text/calendar')],
+        subject: meio.titulo,
+      );
+    } finally {
+      if (mounted) setState(() => _addingToCalendar = false);
     }
   }
 
@@ -225,6 +243,49 @@ class _MeioFormacaoFormScreenState
                       )
                     : Text(_isEdit ? 'Salvar alterações' : 'Marcar formação'),
               ),
+
+              // Botão "Adicionar ao calendário" — aparece após salvar ou em edição
+              if (_savedMeio != null || _isEdit) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _addingToCalendar
+                      ? null
+                      : () => _adicionarAoCalendario(
+                            _savedMeio ??
+                                MeioFormacao(
+                                  id: widget.existing!.id,
+                                  tipo: _tipo,
+                                  titulo: _tituloCtrl.text.trim(),
+                                  data: _data,
+                                  nota: _notaCtrl.text.trim().isEmpty
+                                      ? null
+                                      : _notaCtrl.text.trim(),
+                                ),
+                          ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  icon: _addingToCalendar
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.calendar_month_outlined, size: 18),
+                  label: const Text('Adicionar ao calendário'),
+                ),
+                if (_savedMeio != null && !_isEdit) ...[
+                  const SizedBox(height: 16),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => context.pop(),
+                      child: const Text('Concluir'),
+                    ),
+                  ),
+                ],
+              ],
             ],
           ),
         ),

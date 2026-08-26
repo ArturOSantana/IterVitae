@@ -13,6 +13,7 @@ Future<void> main() async {
   await initializeDateFormatting('pt_BR');
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await NotificationService.instance.init();
+  await NotificationService.instance.requestPermission();
   runApp(const ProviderScope(child: IterVitaeApp()));
 }
 

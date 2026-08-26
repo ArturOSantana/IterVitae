@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../domain/entities/meio_formacao.dart';
 import '../../domain/entities/practice.dart';
 
 /// Gera um arquivo iCalendar (.ics) a partir das práticas ativas do plano de
@@ -23,6 +24,42 @@ class ICalendarService {
     final file = File('${dir.path}/iter_vitae_plano.ics');
     await file.writeAsString(content, flush: true);
     return file;
+  }
+
+  /// Gera um arquivo .ics com um único [MeioFormacao] e retorna o [File].
+  Future<File> generateMeioFormacaoFile(MeioFormacao meio) async {
+    final content = _buildIcsMeio(meio);
+    final dir = await getTemporaryDirectory();
+    final safe = meio.titulo
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]'), '_')
+        .replaceAll(RegExp(r'_+'), '_');
+    final file = File('${dir.path}/iter_vitae_$safe.ics');
+    await file.writeAsString(content, flush: true);
+    return file;
+  }
+
+  String _buildIcsMeio(MeioFormacao meio) {
+    final buf = StringBuffer();
+    final now = _fmtDateTime(DateTime.now().toUtc());
+    final dtstart = DateFormat("yyyyMMdd").format(meio.data);
+
+    buf.writeln('BEGIN:VCALENDAR');
+    buf.writeln('VERSION:2.0');
+    buf.writeln('PRODID:-//Iter Vitae//Plano de Vida//PT');
+    buf.writeln('CALSCALE:GREGORIAN');
+    buf.writeln('METHOD:PUBLISH');
+    buf.writeln('BEGIN:VEVENT');
+    buf.writeln('UID:${meio.id}@iter-vitae');
+    buf.writeln('DTSTAMP:$now');
+    buf.writeln('DTSTART;VALUE=DATE:$dtstart');
+    buf.writeln('DTEND;VALUE=DATE:$dtstart');
+    buf.writeln('SUMMARY:${_escapeText(meio.titulo)}');
+    buf.writeln('DESCRIPTION:${_escapeText(meio.tipo.label)}${meio.nota != null && meio.nota!.isNotEmpty ? '\\n${_escapeText(meio.nota!)}' : ''}');
+    buf.writeln('STATUS:CONFIRMED');
+    buf.writeln('END:VEVENT');
+    buf.writeln('END:VCALENDAR');
+    return buf.toString();
   }
 
   /// Constrói o conteúdo iCalendar completo como [String].

@@ -23,6 +23,7 @@ import 'data/firebase/firestore_reading_session_repository.dart';
 import 'data/firebase/firestore_diary_repository.dart';
 import 'data/firebase/firestore_exame_diario_repository.dart';
 import 'data/firebase/firestore_exame_confissao_repository.dart';
+import 'data/firebase/firestore_meio_formacao_repository.dart';
 import 'data/in_memory/in_memory_practice_repository.dart';
 import 'data/in_memory/in_memory_struggle_repository.dart';
 import 'data/in_memory/in_memory_reflection_repository.dart';
@@ -119,8 +120,8 @@ final exameConfissaoRepositoryProvider = Provider<ExameConfissaoRepository>((ref
   return InMemoryExameConfissaoRepository();
 });
 
-/// Meios de formação — InMemory por ora.
-/// TODO: FirestoreMeioFormacaoRepository.
-final meioFormacaoRepositoryProvider = Provider<MeioFormacaoRepository>(
-  (_) => InMemoryMeioFormacaoRepository(),
-);
+final meioFormacaoRepositoryProvider = Provider<MeioFormacaoRepository>((ref) {
+  final uid = ref.watch(currentUserProvider).valueOrNull?.uid;
+  if (uid != null) return FirestoreMeioFormacaoRepository(uid: uid);
+  return InMemoryMeioFormacaoRepository();
+});
