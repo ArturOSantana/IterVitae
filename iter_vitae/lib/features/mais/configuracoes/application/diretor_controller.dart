@@ -46,23 +46,27 @@ class DiretorController extends AsyncNotifier<DiretorState> {
   @override
   Future<DiretorState> build() async {
     final repo = ref.read(directionRepositoryProvider);
-    final direction = await repo.getOrCreateNext();
+    // Usa getNext() (somente leitura) para não criar documento no Firestore
+    // durante o build. A criação ocorre apenas no save(), quando o usuário
+    // efetivamente interage.
+    final direction = await repo.getNext();
     return DiretorState(
-      nome: direction.directorName,
-      contato: direction.diretorContato,
-      paroquia: direction.diretorParoquia,
-      directionId: direction.id,
+      nome: direction?.directorName,
+      contato: direction?.diretorContato,
+      paroquia: direction?.diretorParoquia,
+      directionId: direction?.id,
     );
   }
 
   /// Persiste as alterações nos campos do diretor na direção ativa.
+  /// Cria a direção no Firestore se ainda não existir.
   Future<void> save({
     required String nome,
     required String contato,
     required String paroquia,
   }) async {
     final current = state.valueOrNull;
-    if (current == null || current.directionId == null) return;
+    if (current == null) return;
 
     state = AsyncData(current.copyWith(isSaving: true));
 

@@ -15,6 +15,8 @@ import '../../features/mais/meios/presentation/meios_formacao_screen.dart';
 import '../../features/mais/meios/presentation/meio_formacao_form_screen.dart';
 import '../../features/mais/configuracoes/presentation/configuracoes_screen.dart';
 import '../../features/mais/configuracoes/presentation/vincular_diretor_screen.dart';
+import '../../features/mais/configuracoes/presentation/gerar_codigo_dirigido_screen.dart';
+import '../../features/mais/configuracoes/presentation/resgatar_codigo_diretor_screen.dart';
 import '../../features/readings/presentation/readings_screen.dart';
 import '../../features/readings/presentation/book_detail_screen.dart';
 import '../../domain/entities/spiritual_direction.dart';
@@ -164,6 +166,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'vincular-diretor',
                 builder: (context, state) => const VincularDiretorScreen(),
+              ),
+              GoRoute(
+                path: 'gerar-codigo-dirigido',
+                builder: (context, state) =>
+                    const GerarCodigoDirigidoScreen(),
+              ),
+              GoRoute(
+                path: 'resgatar-codigo-diretor',
+                builder: (context, state) =>
+                    const ResgatarCodigoDiretorScreen(),
               ),
             ],
           ),

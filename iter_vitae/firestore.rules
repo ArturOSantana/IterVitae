@@ -9,6 +9,7 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Alias — mesmo contrato, dois nomes para clareza nos comentários.
     function isUser(uid) {
       return isAuth() && request.auth.uid == uid;
     }
@@ -72,17 +73,28 @@ service cloud.firestore {
         allow read, write: if isUser(uid);
       }
 
+      // Meios de formação: somente o próprio usuário
+      match /meios_formacao/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
       // Notificações enviadas pelo diretor — o diretor escreve; o dirigido lê
       match /notifications_from_director/{notifId} {
-        // O dirigido pode ler suas próprias notificações e marcar como lida
         allow read, write: if isUser(uid);
         // O diretor só pode criar (não ler, não editar, não apagar)
         allow create: if isAuth()
           && request.resource.data.directorUid == request.auth.uid;
       }
+
+      // Vínculo com o diretor — escrito em batch pelo diretor via linkByCode;
+      // somente o próprio usuário pode ler.
+      match /director/link {
+        allow read: if isUser(uid);
+        allow write: if isAuth();
+      }
     }
 
-    // ── Perfil do diretor ────────────────────────────────────────────────────
+    // ── Perfil e dados do diretor ─────────────────────────────────────────────
 
     match /directors/{directorUid} {
       // O diretor cria/lê/atualiza seu próprio perfil
@@ -90,11 +102,10 @@ service cloud.firestore {
 
       // ── Vínculos com dirigidos ───────────────────────────────────────────
       match /directees/{directeeUid} {
-        // O dirigido ESCREVE seu próprio vínculo (apelido, data)
+        // O diretor gerencia seus próprios vínculos (notas privadas, etc.)
+        allow read, write: if isDirector(directorUid);
+        // O dirigido cria/atualiza seu próprio registro de vínculo
         allow create, update: if isAuth() && request.auth.uid == directeeUid;
-        // O diretor LÊ (nunca escreve) os vínculos dentro do seu próprio namespace
-        allow read: if isDirector(directorUid);
-        // Nenhum diretor lê vínculos de outro diretor (coberto pela regra acima)
 
         // ── Relatórios enviados pelo dirigido ────────────────────────────
         match /reports/{reportId} {
@@ -103,24 +114,61 @@ service cloud.firestore {
           // O diretor vinculado lê
           allow read: if isDirector(directorUid);
         }
+
+        // ── Propostas criadas pelo diretor ────────────────────────────────
+        // O diretor cria propostas (status: pendente) e pode ler/escrever tudo.
+        // O dirigido só pode atualizar o campo status (aceitar/recusar) —
+        // nunca lê o conteúdo completo da proposta.
+        match /proposals/{proposalId} {
+          allow read, write: if isDirector(directorUid);
+          allow create: if isDirector(directorUid)
+                        && request.resource.data.status == 'pendente';
+          allow update: if isAuth()
+                        && request.auth.uid == directeeUid
+                        && resource.data.status == 'pendente'
+                        && (request.resource.data.status == 'aceita'
+                            || request.resource.data.status == 'recusada')
+                        && request.resource.data.diff(resource.data)
+                               .affectedKeys().hasOnly(['status']);
+        }
       }
     }
 
-    // ── Códigos de convite ────────────────────────────────────────────────────
+    // ── Códigos de vínculo gerados pelo diretor ───────────────────────────────
+    // Campo-chave: diretorUid (sem acento — padrão do app diretor).
+    // Qualquer autenticado pode GET (para validar o código ao resgatar).
+    // Somente o diretor que criou pode ler a listagem completa.
 
     match /invite_codes/{codigo} {
-      // O dirigido cria seu próprio código
+      // Qualquer autenticado pode ler um código pelo ID (para validar)
+      allow get: if isAuth();
+      // O diretor cria seu próprio código
       allow create: if isAuth()
-        && request.resource.data.directeeUid == request.auth.uid
+        && request.resource.data.diretorUid == request.auth.uid
         && request.resource.data.usado == false;
-      // O dirigido lê seu próprio código (para exibir na tela)
-      allow read: if isAuth()
-        && resource.data.directeeUid == request.auth.uid;
-      // O diretor valida e marca como usado (update apenas o campo `usado`)
+      // O diretor lê sua própria listagem
+      allow list: if isAuth()
+        && resource.data.diretorUid == request.auth.uid;
+      // O dirigido (ou qualquer autenticado) marca o código como usado
       allow update: if isAuth()
         && resource.data.usado == false
         && request.resource.data.usado == true
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usado']);
+        && request.resource.data.diff(resource.data)
+               .affectedKeys().hasOnly(['usado']);
+    }
+
+    // ── Notificações do diretor para o dirigido ───────────────────────────────
+    // Qualquer diretor autenticado pode criar notificações.
+    // O dirigido lê e atualiza as próprias notificações (ex.: marcar como lida).
+
+    match /notifications/{directeeUid}/inbox/{notifId} {
+      allow create: if isAuth();
+      allow read, update: if isUser(directeeUid);
+    }
+
+    // ── Nega tudo o que não foi explicitamente permitido acima ────────────────
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

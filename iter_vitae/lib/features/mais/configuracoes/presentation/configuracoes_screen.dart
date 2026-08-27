@@ -45,6 +45,10 @@ class ConfiguracoesScreen extends ConsumerWidget {
           _DiretorCard(ref: ref),
           const SizedBox(height: 8),
           const _VincularDiretorTile(),
+          const SizedBox(height: 4),
+          const _GerarCodigoDirigidoTile(),
+          const SizedBox(height: 4),
+          const _ResgatarCodigoDiretorTile(),
           const SizedBox(height: 24),
 
           // ── Privacidade ────────────────────────────────────────────────
@@ -1060,6 +1064,78 @@ class _VincularDiretorTile extends ConsumerWidget {
         onTap: temDiretor
             ? null
             : () => context.push('/mais/vincular-diretor'),
+        dense: true,
+      ),
+    );
+  }
+}
+
+
+/// Tile para o diretor gerar um código que o dirigido pode inserir.
+class _GerarCodigoDirigidoTile extends StatelessWidget {
+  const _GerarCodigoDirigidoTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(
+          Icons.qr_code_outlined,
+          size: 20,
+          color: AppColors.textMuted,
+        ),
+        title: Text(
+          'Gerar código para dirigido',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        subtitle: Text(
+          'Gere um código e envie ao seu dirigido para completar o vínculo.',
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: AppColors.textMuted),
+        ),
+        trailing: const Icon(Icons.chevron_right,
+            size: 20, color: AppColors.textMuted),
+        onTap: () => context.push('/mais/gerar-codigo-dirigido'),
+        dense: true,
+      ),
+    );
+  }
+}
+
+/// Tile para o dirigido inserir o código gerado pelo seu diretor.
+class _ResgatarCodigoDiretorTile extends ConsumerWidget {
+  const _ResgatarCodigoDiretorTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final temDirAsync = ref.watch(temDiretorVinculadoProvider);
+    final temDiretor = temDirAsync.valueOrNull ?? false;
+
+    if (temDiretor) return const SizedBox.shrink();
+
+    return Card(
+      child: ListTile(
+        leading: const Icon(
+          Icons.vpn_key_outlined,
+          size: 20,
+          color: AppColors.textMuted,
+        ),
+        title: Text(
+          'Inserir código do meu diretor',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        subtitle: Text(
+          'Seu diretor enviou um código? Digite aqui para se vincular.',
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: AppColors.textMuted),
+        ),
+        trailing: const Icon(Icons.chevron_right,
+            size: 20, color: AppColors.textMuted),
+        onTap: () => context.push('/mais/resgatar-codigo-diretor'),
         dense: true,
       ),
     );
