@@ -45,8 +45,6 @@ class ConfiguracoesScreen extends ConsumerWidget {
           _DiretorCard(ref: ref),
           const SizedBox(height: 8),
           const _VincularDiretorTile(),
-          const SizedBox(height: 8),
-          const _SouDiretorTile(),
           const SizedBox(height: 24),
 
           // ── Privacidade ────────────────────────────────────────────────
@@ -1068,38 +1066,3 @@ class _VincularDiretorTile extends ConsumerWidget {
   }
 }
 
-/// Tile para o diretor espiritual inserir o código de um novo dirigido.
-class _SouDiretorTile extends StatelessWidget {
-  const _SouDiretorTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: const Icon(
-          Icons.manage_accounts_outlined,
-          size: 20,
-          color: AppColors.textMuted,
-        ),
-        title: Text(
-          'Sou diretor espiritual',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        subtitle: Text(
-          'Insira o código do seu dirigido para vinculá-lo.',
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.copyWith(color: AppColors.textMuted),
-        ),
-        trailing: const Icon(
-          Icons.chevron_right,
-          size: 20,
-          color: AppColors.textMuted,
-        ),
-        onTap: () => context.push('/mais/inserir-codigo-dirigido'),
-        dense: true,
-      ),
-    );
-  }
-}
