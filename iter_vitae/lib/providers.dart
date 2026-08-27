@@ -12,6 +12,7 @@ import 'domain/repositories/diary_repository.dart';
 import 'domain/repositories/exame_diario_repository.dart';
 import 'domain/repositories/exame_confissao_repository.dart';
 import 'domain/repositories/meio_formacao_repository.dart';
+import 'domain/repositories/user_profile_repository.dart';
 import 'data/firebase/firebase_auth_repository.dart';
 import 'data/firebase/firestore_practice_repository.dart';
 import 'data/firebase/firestore_struggle_repository.dart';
@@ -24,6 +25,7 @@ import 'data/firebase/firestore_diary_repository.dart';
 import 'data/firebase/firestore_exame_diario_repository.dart';
 import 'data/firebase/firestore_exame_confissao_repository.dart';
 import 'data/firebase/firestore_meio_formacao_repository.dart';
+import 'data/firebase/firestore_user_profile_repository.dart';
 import 'data/in_memory/in_memory_practice_repository.dart';
 import 'data/in_memory/in_memory_struggle_repository.dart';
 import 'data/in_memory/in_memory_reflection_repository.dart';
@@ -35,6 +37,7 @@ import 'data/in_memory/in_memory_diary_repository.dart';
 import 'data/in_memory/in_memory_exame_diario_repository.dart';
 import 'data/in_memory/in_memory_exame_confissao_repository.dart';
 import 'data/in_memory/in_memory_meio_formacao_repository.dart';
+import 'data/in_memory/in_memory_user_profile_repository.dart';
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
@@ -131,4 +134,10 @@ final meioFormacaoRepositoryProvider = Provider<MeioFormacaoRepository>((ref) {
   final uid = ref.watch(_currentUidProvider);
   if (uid != null) return FirestoreMeioFormacaoRepository(uid: uid);
   return InMemoryMeioFormacaoRepository();
+});
+
+final userProfileRepositoryProvider = Provider<UserProfileRepository>((ref) {
+  final uid = ref.watch(_currentUidProvider);
+  if (uid != null) return FirestoreUserProfileRepository(uid: uid);
+  return InMemoryUserProfileRepository();
 });

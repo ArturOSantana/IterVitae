@@ -179,15 +179,17 @@ describe('Checklist 3 — diretor NÃO escreve em directees (apenas lê)', () =>
   });
 });
 
-describe('Checklist 4 — código de convite expira e não pode ser reutilizado', () => {
+describe('Checklist 4 — código de convite: diretor cria, dirigido resgata', () => {
   const directeeUid = 'user-004';
   const directorUid = 'director-D';
   const codigo = 'ABC123';
 
-  test('dirigido pode criar código com usado=false', async () => {
+  // ── Criação: somente o diretor pode criar ────────────────────────────────
+
+  test('diretor pode criar código com diretorUid e usado=false', async () => {
     await assertSucceeds(
-      asUser(directeeUid).doc(`invite_codes/${codigo}`).set({
-        directeeUid,
+      asDirector(directorUid).doc(`invite_codes/${codigo}`).set({
+        diretorUid: directorUid,
         criadoEm: new Date(),
         expiraEm: new Date(Date.now() + 24 * 60 * 60 * 1000),
         usado: false,
@@ -195,27 +197,179 @@ describe('Checklist 4 — código de convite expira e não pode ser reutilizado'
     );
   });
 
-  test('código já marcado como usado=true não pode ser marcado novamente', async () => {
+  test('diretor pode criar código incluindo nome, telefone e paróquia', async () => {
+    await assertSucceeds(
+      asDirector(directorUid).doc(`invite_codes/CODNM1`).set({
+        diretorUid: directorUid,
+        criadoEm: new Date(),
+        expiraEm: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        usado: false,
+        diretorNome: 'Pe. João',
+        diretorTelefone: '+55 11 99999-0000',
+        diretorParoquia: 'Paróquia Santíssima Trindade',
+      })
+    );
+  });
+
+  test('diretor não pode criar código com campos não permitidos', async () => {
+    await assertFails(
+      asDirector(directorUid).doc(`invite_codes/INVLD1`).set({
+        diretorUid: directorUid,
+        criadoEm: new Date(),
+        expiraEm: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        usado: false,
+        campoNaoPermitido: 'hack',
+      })
+    );
+  });
+
+  test('dirigido NÃO pode criar código de convite', async () => {
+    await assertFails(
+      asUser(directeeUid).doc(`invite_codes/NOVO99`).set({
+        diretorUid: directorUid,
+        criadoEm: new Date(),
+        expiraEm: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        usado: false,
+      })
+    );
+  });
+
+  test('diretor não pode criar código com diretorUid de outro diretor', async () => {
+    await assertFails(
+      asDirector(directorUid).doc(`invite_codes/FALSO9`).set({
+        diretorUid: 'outro-diretor',
+        criadoEm: new Date(),
+        expiraEm: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        usado: false,
+      })
+    );
+  });
+
+  test('diretor não pode criar código com usado=true', async () => {
+    await assertFails(
+      asDirector(directorUid).doc(`invite_codes/FALSO9`).set({
+        diretorUid: directorUid,
+        criadoEm: new Date(),
+        expiraEm: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        usado: true,
+      })
+    );
+  });
+
+  // ── Resgate: qualquer autenticado marca como usado=true (apenas esse campo) ─
+
+  test('dirigido pode marcar código válido como usado=true', async () => {
     await testEnv.withSecurityRulesDisabled(async (ctx) => {
       await ctx.firestore().doc(`invite_codes/${codigo}`).set({
-        directeeUid,
-        usado: true,
+        diretorUid: directorUid,
+        usado: false,
       });
     });
 
-    await assertFails(
-      asDirector(directorUid)
+    await assertSucceeds(
+      asUser(directeeUid)
         .doc(`invite_codes/${codigo}`)
         .update({ usado: true })
     );
   });
 
-  test('diretor não pode criar código', async () => {
+  test('código já marcado como usado=true não pode ser marcado novamente', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().doc(`invite_codes/${codigo}`).set({
+        diretorUid: directorUid,
+        usado: true,
+      });
+    });
+
     await assertFails(
-      asDirector(directorUid).doc(`invite_codes/NOVO99`).set({
-        directeeUid: 'outro',
+      asUser(directeeUid)
+        .doc(`invite_codes/${codigo}`)
+        .update({ usado: true })
+    );
+  });
+
+  test('não é possível alterar outros campos além de usado ao resgatar', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().doc(`invite_codes/${codigo}`).set({
+        diretorUid: directorUid,
         usado: false,
-      })
+      });
+    });
+
+    await assertFails(
+      asUser(directeeUid)
+        .doc(`invite_codes/${codigo}`)
+        .update({ usado: true, diretorUid: 'hackeado' })
+    );
+  });
+
+  // ── Leitura: qualquer autenticado pode GET por ID (para validar o código) ─
+
+  test('qualquer autenticado pode ler código por ID', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().doc(`invite_codes/${codigo}`).set({
+        diretorUid: directorUid,
+        usado: false,
+      });
+    });
+
+    await assertSucceeds(
+      asUser(directeeUid).doc(`invite_codes/${codigo}`).get()
+    );
+  });
+
+  test('não autenticado não pode ler código', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().doc(`invite_codes/${codigo}`).set({
+        diretorUid: directorUid,
+        usado: false,
+      });
+    });
+
+    await assertFails(
+      unauth().doc(`invite_codes/${codigo}`).get()
     );
   });
 });
+
+describe('Checklist 5 — resgate de código: batch completo do dirigido', () => {
+  const directeeUid = 'user-005';
+  const directorUid = 'director-E';
+  const codigo = 'XYZ789';
+
+  test('dirigido pode criar vínculo em directors/{directorUid}/directees/{uid} com set sem merge', async () => {
+    await assertSucceeds(
+      asUser(directeeUid)
+        .doc(`directors/${directorUid}/directees/${directeeUid}`)
+        .set({ vinculadoEm: new Date() })
+    );
+  });
+
+  test('dirigido pode atualizar seu próprio perfil com directorUid', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().doc(`users/${directeeUid}`).set({ nome: 'Teste' });
+    });
+
+    await assertSucceeds(
+      asUser(directeeUid)
+        .doc(`users/${directeeUid}`)
+        .update({ directorUid: directorUid })
+    );
+  });
+
+  test('dirigido pode marcar código como usado=true (operação de resgate)', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().doc(`invite_codes/${codigo}`).set({
+        diretorUid: directorUid,
+        usado: false,
+      });
+    });
+
+    await assertSucceeds(
+      asUser(directeeUid)
+        .doc(`invite_codes/${codigo}`)
+        .update({ usado: true })
+    );
+  });
+});
+

@@ -59,6 +59,11 @@ service cloud.firestore {
         allow read, write: if isUser(uid);
       }
 
+      // Sessões de exame de confissão: somente o próprio usuário
+      match /exame_confissao_sessoes/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
       // Virtudes: somente o próprio usuário
       match /virtues/{docId} {
         allow read, write: if isUser(uid);
@@ -70,6 +75,11 @@ service cloud.firestore {
       }
 
       match /reading_sessions/{docId} {
+        allow read, write: if isUser(uid);
+      }
+
+      // Logs de práticas: somente o próprio usuário
+      match /practice_logs/{docId} {
         allow read, write: if isUser(uid);
       }
 
@@ -120,7 +130,7 @@ service cloud.firestore {
         // O dirigido só pode atualizar o campo status (aceitar/recusar) —
         // nunca lê o conteúdo completo da proposta.
         match /proposals/{proposalId} {
-          allow read, write: if isDirector(directorUid);
+          allow read, update, delete: if isDirector(directorUid);
           allow create: if isDirector(directorUid)
                         && request.resource.data.status == 'pendente';
           allow update: if isAuth()
@@ -143,9 +153,15 @@ service cloud.firestore {
       // Qualquer autenticado pode ler um código pelo ID (para validar)
       allow get: if isAuth();
       // O diretor cria seu próprio código
+      // Campos permitidos: diretorUid, apelido, criadoEm, expiraEm, usado,
+      //                    nome, telefone, paroquia (opcionais do novo fluxo)
       allow create: if isAuth()
         && request.resource.data.diretorUid == request.auth.uid
-        && request.resource.data.usado == false;
+        && request.resource.data.usado == false
+        && request.resource.data.keys().hasOnly([
+             'diretorUid', 'apelido', 'criadoEm', 'expiraEm', 'usado',
+             'nome', 'telefone', 'paroquia'
+           ]);
       // O diretor lê sua própria listagem
       allow list: if isAuth()
         && resource.data.diretorUid == request.auth.uid;

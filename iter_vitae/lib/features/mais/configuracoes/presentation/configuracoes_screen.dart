@@ -11,6 +11,7 @@ import 'package:iter_vitae/features/mais/configuracoes/application/notification_
 import 'package:iter_vitae/features/mais/configuracoes/application/notification_prefs_controller.dart';
 import 'package:iter_vitae/features/direction/application/enviar_relatorio_diretor.dart';
 import 'package:iter_vitae/providers.dart';
+import 'package:iter_vitae/features/mais/configuracoes/application/perfil_controller.dart';
 
 /// Tela de Configurações — conta, diretor, notificações, exportação, sobre.
 class ConfiguracoesScreen extends ConsumerWidget {
@@ -29,6 +30,12 @@ class ConfiguracoesScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
         children: [
+          // ── Meu perfil ────────────────────────────────────────────────
+          _SectionLabel(label: 'Meu perfil'),
+          const SizedBox(height: 8),
+          _PerfilCard(ref: ref),
+          const SizedBox(height: 24),
+
           // ── Conta ──────────────────────────────────────────────────────
           _SectionLabel(label: 'Conta'),
           const SizedBox(height: 8),
@@ -45,10 +52,6 @@ class ConfiguracoesScreen extends ConsumerWidget {
           _DiretorCard(ref: ref),
           const SizedBox(height: 8),
           const _VincularDiretorTile(),
-          const SizedBox(height: 4),
-          const _GerarCodigoDirigidoTile(),
-          const SizedBox(height: 4),
-          const _ResgatarCodigoDiretorTile(),
           const SizedBox(height: 24),
 
           // ── Privacidade ────────────────────────────────────────────────
@@ -168,6 +171,165 @@ class ConfiguracoesScreen extends ConsumerWidget {
     // ignore: use_build_context_synchronously
     if (!context.mounted) return;
     context.go('/login');
+  }
+}
+
+// ── Card do meu perfil ───────────────────────────────────────────────────────
+
+class _PerfilCard extends StatefulWidget {
+  const _PerfilCard({required this.ref});
+  final WidgetRef ref;
+
+  @override
+  State<_PerfilCard> createState() => _PerfilCardState();
+}
+
+class _PerfilCardState extends State<_PerfilCard> {
+  final _nomeCtrl = TextEditingController();
+  final _telefoneCtrl = TextEditingController();
+  final _paroquiaCtrl = TextEditingController();
+
+  bool _editando = false;
+  bool _initialized = false;
+
+  @override
+  void dispose() {
+    _nomeCtrl.dispose();
+    _telefoneCtrl.dispose();
+    _paroquiaCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final perfilAsync = widget.ref.watch(perfilControllerProvider);
+    final theme = Theme.of(context);
+
+    return perfilAsync.when(
+      loading: () => const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (perfil) {
+        if (!_initialized) {
+          _nomeCtrl.text = perfil.nome ?? '';
+          _telefoneCtrl.text = perfil.telefone ?? '';
+          _paroquiaCtrl.text = perfil.paroquia ?? '';
+          _initialized = true;
+        }
+
+        final temNome = perfil.nome?.isNotEmpty == true;
+
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.account_circle_outlined,
+                        size: 20, color: AppColors.textMuted),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        temNome ? perfil.nome! : 'Sem nome cadastrado',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: temNome
+                              ? AppColors.textPrimary
+                              : AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => setState(() => _editando = !_editando),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        padding: EdgeInsets.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(_editando ? 'Cancelar' : 'Editar'),
+                    ),
+                  ],
+                ),
+
+                if (!_editando && temNome) ...[
+                  if (perfil.telefone?.isNotEmpty == true) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      perfil.telefone!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                  if (perfil.paroquia?.isNotEmpty == true) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      perfil.paroquia!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ],
+
+                if (_editando) ...[
+                  const SizedBox(height: 12),
+                  _CampoTexto(
+                    controller: _nomeCtrl,
+                    label: 'Nome completo',
+                    hint: '',
+                  ),
+                  const SizedBox(height: 8),
+                  _CampoTexto(
+                    controller: _telefoneCtrl,
+                    label: 'Telefone',
+                    hint: '',
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 8),
+                  _CampoTexto(
+                    controller: _paroquiaCtrl,
+                    label: 'Paróquia / comunidade',
+                    hint: '',
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: perfil.isSaving ? null : _salvar,
+                      child: perfil.isSaving
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Text('Salvar'),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _salvar() async {
+    setState(() => _editando = false);
+    await widget.ref.read(perfilControllerProvider.notifier).save(
+          nome: _nomeCtrl.text,
+          telefone: _telefoneCtrl.text,
+          paroquia: _paroquiaCtrl.text,
+        );
+    _initialized = false;
   }
 }
 
@@ -1051,7 +1213,7 @@ class _VincularDiretorTile extends ConsumerWidget {
         subtitle: Text(
           temDiretor
               ? 'Vínculo ativo. Para desvincular, contate o suporte.'
-              : 'Gere um código e informe ao seu diretor espiritual.',
+              : 'Insira o código gerado pelo seu diretor espiritual.',
           style: Theme.of(context)
               .textTheme
               .bodySmall
@@ -1063,79 +1225,7 @@ class _VincularDiretorTile extends ConsumerWidget {
                 size: 20, color: AppColors.textMuted),
         onTap: temDiretor
             ? null
-            : () => context.push('/mais/vincular-diretor'),
-        dense: true,
-      ),
-    );
-  }
-}
-
-
-/// Tile para o diretor gerar um código que o dirigido pode inserir.
-class _GerarCodigoDirigidoTile extends StatelessWidget {
-  const _GerarCodigoDirigidoTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: const Icon(
-          Icons.qr_code_outlined,
-          size: 20,
-          color: AppColors.textMuted,
-        ),
-        title: Text(
-          'Gerar código para dirigido',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        subtitle: Text(
-          'Gere um código e envie ao seu dirigido para completar o vínculo.',
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.copyWith(color: AppColors.textMuted),
-        ),
-        trailing: const Icon(Icons.chevron_right,
-            size: 20, color: AppColors.textMuted),
-        onTap: () => context.push('/mais/gerar-codigo-dirigido'),
-        dense: true,
-      ),
-    );
-  }
-}
-
-/// Tile para o dirigido inserir o código gerado pelo seu diretor.
-class _ResgatarCodigoDiretorTile extends ConsumerWidget {
-  const _ResgatarCodigoDiretorTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final temDirAsync = ref.watch(temDiretorVinculadoProvider);
-    final temDiretor = temDirAsync.valueOrNull ?? false;
-
-    if (temDiretor) return const SizedBox.shrink();
-
-    return Card(
-      child: ListTile(
-        leading: const Icon(
-          Icons.vpn_key_outlined,
-          size: 20,
-          color: AppColors.textMuted,
-        ),
-        title: Text(
-          'Inserir código do meu diretor',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        subtitle: Text(
-          'Seu diretor enviou um código? Digite aqui para se vincular.',
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.copyWith(color: AppColors.textMuted),
-        ),
-        trailing: const Icon(Icons.chevron_right,
-            size: 20, color: AppColors.textMuted),
-        onTap: () => context.push('/mais/resgatar-codigo-diretor'),
+            : () => context.push('/mais/resgatar-codigo-diretor'),
         dense: true,
       ),
     );

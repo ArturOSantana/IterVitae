@@ -41,7 +41,7 @@ class EnviarRelatorioDiretorController
         .collection('users')
         .doc(user.uid)
         .get();
-    final directorUid = userDoc.get('directorUid') as String?;
+    final directorUid = userDoc.data()?['directorUid'] as String?;
 
     if (directorUid == null || directorUid.isEmpty) {
       state = const AsyncData(EnviarRelatorioDiretorState(
@@ -99,12 +99,10 @@ final enviarRelatorioDiretorProvider = AsyncNotifierProvider<
 final temDiretorVinculadoProvider = FutureProvider<bool>((ref) async {
   final uid = ref.watch(currentUserProvider.select((v) => v.valueOrNull?.uid));
   if (uid == null) return false;
-  final user = ref.read(currentUserProvider).valueOrNull;
-  if (user == null) return false;
   final doc = await FirebaseFirestore.instance
       .collection('users')
-      .doc(user.uid)
+      .doc(uid)
       .get();
-  final directorUid = doc.get('directorUid') as String?;
+  final directorUid = doc.data()?['directorUid'] as String?;
   return directorUid != null && directorUid.isNotEmpty;
 });

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../providers.dart';
+import 'diretor_controller.dart';
 
 /// Estado do gerador de código de convite do diretor.
 class DirectorInviteCodeState {
@@ -38,6 +39,11 @@ class DirectorInviteCodeController
       final codigo = _generate();
       final db = FirebaseFirestore.instance;
 
+      // Lê o perfil do diretor para incluir nome/telefone/paróquia no código.
+      // Assim o dirigido recebe essas infos fixas ao resgatar.
+      final diretorState =
+          ref.read(diretorControllerProvider).valueOrNull;
+
       await db.collection('invite_codes').doc(codigo).set({
         'diretorUid': user.uid,
         'criadoEm': FieldValue.serverTimestamp(),
@@ -45,6 +51,12 @@ class DirectorInviteCodeController
           DateTime.now().add(const Duration(hours: 24)),
         ),
         'usado': false,
+        if (diretorState?.nome?.isNotEmpty == true)
+          'diretorNome': diretorState!.nome,
+        if (diretorState?.contato?.isNotEmpty == true)
+          'diretorTelefone': diretorState!.contato,
+        if (diretorState?.paroquia?.isNotEmpty == true)
+          'diretorParoquia': diretorState!.paroquia,
       });
 
       state = AsyncData(DirectorInviteCodeState(codigo: codigo));

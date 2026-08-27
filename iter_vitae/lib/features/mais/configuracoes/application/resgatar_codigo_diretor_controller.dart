@@ -2,7 +2,6 @@ import 'dart:developer' as dev;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../providers.dart';
-
 /// Estado do resgate de código do diretor.
 class ResgatarCodigoDiretorState {
   const ResgatarCodigoDiretorState({
@@ -19,10 +18,13 @@ class ResgatarCodigoDiretorState {
 /// O dirigido digita o código gerado pelo diretor.
 ///
 /// Fluxo:
-/// 1. Busca /director_invite_codes/{codigo}
+/// 1. Busca /invite_codes/{codigo}
 /// 2. Valida: existe, não usado, não expirado
 /// 3. Grava users/{uid}.directorUid = directorUid do código
-/// 4. Marca o código como usado
+/// 4. Grava vínculo em /directors/{directorUid}/directees/{uid}
+/// 5. Marca o código como usado
+/// 6. Se o código contiver diretorNome/diretorTelefone/diretorParoquia,
+///    preenche automaticamente a direção ativa do dirigido.
 class ResgatarCodigoDiretorController
     extends AsyncNotifier<ResgatarCodigoDiretorState> {
   @override
@@ -82,14 +84,56 @@ class ResgatarCodigoDiretorController
         return;
       }
 
-      // Grava o vínculo e marca o código como usado atomicamente
+      // Campos opcionais que o app diretor pode ter incluído no código
+      final diretorNome = data['diretorNome'] as String?;
+      final diretorTelefone = data['diretorTelefone'] as String?;
+      final diretorParoquia = data['diretorParoquia'] as String?;
+
+      // Grava o vínculo atomicamente:
+      // 1. directorUid no perfil do dirigido (para envio de relatórios, etc.)
+      // 2. registro do vínculo em /directors/{directorUid}/directees/{uid}
+      // 3. marca o código como usado (evita reutilização)
       final batch = db.batch();
-      batch.update(
+      // set+merge: suporta tanto o caso em que users/{uid} já existe
+      // quanto o caso em que o documento ainda não foi criado.
+      batch.set(
         db.collection('users').doc(user.uid),
         {'directorUid': directorUid},
+        SetOptions(merge: true),
+      );
+      batch.set(
+        db
+            .collection('directors')
+            .doc(directorUid)
+            .collection('directees')
+            .doc(user.uid),
+        {'vinculadoEm': FieldValue.serverTimestamp()},
       );
       batch.update(docRef, {'usado': true});
       await batch.commit();
+
+      // Se o código contiver infos do diretor, preenche automaticamente
+      // a direção ativa do dirigido para que fiquem fixas nas configurações.
+      if (diretorNome != null && diretorNome.isNotEmpty) {
+        try {
+          final repo = ref.read(directionRepositoryProvider);
+          final direction = await repo.getOrCreateNext();
+          final updated = direction.copyWith(
+            directorName: diretorNome,
+            diretorContato:
+                diretorTelefone?.isNotEmpty == true ? diretorTelefone : null,
+            diretorParoquia:
+                diretorParoquia?.isNotEmpty == true ? diretorParoquia : null,
+          );
+          await repo.save(updated);
+        } catch (e, st) {
+          dev.log(
+            'ResgatarCodigoDiretorController: erro ao salvar infos do diretor: $e',
+            stackTrace: st,
+          );
+          // Falha silenciosa — o vínculo já foi criado com sucesso
+        }
+      }
 
       state = const AsyncData(ResgatarCodigoDiretorState(vinculado: true));
     } catch (e, st) {
