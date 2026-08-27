@@ -3,6 +3,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import 'web_notification_service.dart';
+
 /// Serviço centralizado de notificações locais.
 ///
 /// Responsabilidades:
@@ -24,6 +26,9 @@ class NotificationService {
   static const int kIdMeios = 10003;
   static const int kIdMeiosHoje = 10004;
   static const int kIdConfissao = 10005;
+  static const int kIdAngelusManha = 10006;
+  static const int kIdAngelusMeio = 10007;
+  static const int kIdAngelusTarde = 10008;
 
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
@@ -36,7 +41,7 @@ class NotificationService {
   Future<void> init() async {
     if (_initialized) return;
 
-    // Notificações locais não funcionam na web (plugin retorna null silencioso)
+    // Notificações locais não funcionam na web — usamos WebNotificationService.
     if (kIsWeb) {
       _initialized = true;
       return;
@@ -61,10 +66,12 @@ class NotificationService {
     _initialized = true;
   }
 
-  /// Solicita permissão ao usuário (iOS / Android 13+).
+  /// Solicita permissão ao usuário (iOS / Android 13+ / Web).
   /// Chamado no cold start, logo após [init].
   Future<bool> requestPermission() async {
-    if (kIsWeb) return false;
+    if (kIsWeb) {
+      return WebNotificationService.instance.requestPermission();
+    }
 
     final ios = _plugin.resolvePlatformSpecificImplementation<
         IOSFlutterLocalNotificationsPlugin>();
@@ -93,7 +100,16 @@ class NotificationService {
     required String scheduledTime,
     String body = 'Hora da sua prática.',
   }) async {
-    if (kIsWeb || !_initialized) return;
+    if (kIsWeb) {
+      WebNotificationService.instance.scheduleDaily(
+        id: practiceId,
+        title: title,
+        body: body,
+        scheduledTime: scheduledTime,
+      );
+      return;
+    }
+    if (!_initialized) return;
 
     final parts = scheduledTime.split(':');
     if (parts.length != 2) return;
@@ -155,7 +171,16 @@ class NotificationService {
     required String channelName,
     required String channelDesc,
   }) async {
-    if (kIsWeb || !_initialized) return;
+    if (kIsWeb) {
+      WebNotificationService.instance.scheduleDaily(
+        id: id.toString(),
+        title: title,
+        body: body,
+        scheduledTime: scheduledTime,
+      );
+      return;
+    }
+    if (!_initialized) return;
 
     final parts = scheduledTime.split(':');
     if (parts.length != 2) return;
@@ -196,7 +221,16 @@ class NotificationService {
     required String channelName,
     required String channelDesc,
   }) async {
-    if (kIsWeb || !_initialized) return;
+    if (kIsWeb) {
+      WebNotificationService.instance.scheduleOnce(
+        id: id.toString(),
+        title: title,
+        body: body,
+        targetDate: targetDate,
+      );
+      return;
+    }
+    if (!_initialized) return;
 
     final now = DateTime.now();
     if (targetDate.isBefore(now)) return; // data passada — nada a agendar
@@ -230,7 +264,20 @@ class NotificationService {
     required String channelName,
     required String channelDesc,
   }) async {
-    if (kIsWeb || !_initialized) return;
+    if (kIsWeb) {
+      // Na web, simula como "schedule once" daqui a intervalDays às 09:00.
+      final now = DateTime.now();
+      final target = DateTime(
+          now.year, now.month, now.day + intervalDays, 9, 0);
+      WebNotificationService.instance.scheduleOnce(
+        id: id.toString(),
+        title: title,
+        body: body,
+        targetDate: target,
+      );
+      return;
+    }
+    if (!_initialized) return;
 
     final now = tz.TZDateTime.now(tz.local);
     // Agenda para daqui a [intervalDays] dias às 09:00
@@ -261,19 +308,31 @@ class NotificationService {
 
   /// Cancela a notificação de [practiceId].
   Future<void> cancel(String practiceId) async {
-    if (kIsWeb || !_initialized) return;
+    if (kIsWeb) {
+      WebNotificationService.instance.cancel(practiceId);
+      return;
+    }
+    if (!_initialized) return;
     await _plugin.cancel(id: _idForPractice(practiceId));
   }
 
   /// Cancela uma notificação pelo [id] numérico.
   Future<void> cancelById(int id) async {
-    if (kIsWeb || !_initialized) return;
+    if (kIsWeb) {
+      WebNotificationService.instance.cancel(id.toString());
+      return;
+    }
+    if (!_initialized) return;
     await _plugin.cancel(id: id);
   }
 
   /// Cancela todas as notificações agendadas pelo app.
   Future<void> cancelAll() async {
-    if (kIsWeb || !_initialized) return;
+    if (kIsWeb) {
+      WebNotificationService.instance.cancelAll();
+      return;
+    }
+    if (!_initialized) return;
     await _plugin.cancelAll();
   }
 

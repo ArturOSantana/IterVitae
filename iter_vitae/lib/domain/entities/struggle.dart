@@ -34,6 +34,10 @@ class DailyStruggleLog {
 /// [origemDirecaoId] aponta para a direção onde a luta foi combinada.
 /// [encerradaEmDirecaoId] aponta para a direção onde foi revisada/encerrada —
 /// nullable porque uma luta pode atravessar mais de uma direção antes de ser encerrada.
+
+/// Sentinela para distinguir "não passou" de "passou null" em [Struggle.copyWith].
+const _sentinel = Object();
+
 class Struggle {
   const Struggle({
     required this.id,
@@ -64,20 +68,24 @@ class Struggle {
     String? id,
     String? title,
     StruggleStatus? status,
-    String? origemDirecaoId,
-    String? encerradaEmDirecaoId,
+    Object? origemDirecaoId = _sentinel,
+    Object? encerradaEmDirecaoId = _sentinel,
     DateTime? startDate,
-    DateTime? endDate,
+    Object? endDate = _sentinel,
     List<DailyStruggleLog>? dailyLogs,
   }) {
     return Struggle(
       id: id ?? this.id,
       title: title ?? this.title,
       status: status ?? this.status,
-      origemDirecaoId: origemDirecaoId ?? this.origemDirecaoId,
-      encerradaEmDirecaoId: encerradaEmDirecaoId ?? this.encerradaEmDirecaoId,
+      origemDirecaoId: origemDirecaoId == _sentinel
+          ? this.origemDirecaoId
+          : origemDirecaoId as String?,
+      encerradaEmDirecaoId: encerradaEmDirecaoId == _sentinel
+          ? this.encerradaEmDirecaoId
+          : encerradaEmDirecaoId as String?,
       startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
+      endDate: endDate == _sentinel ? this.endDate : endDate as DateTime?,
       dailyLogs: dailyLogs ?? this.dailyLogs,
     );
   }

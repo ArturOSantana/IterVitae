@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../domain/entities/struggle.dart';
 import '../../../providers.dart';
 import '../../hoje/application/hoje_controller.dart';
+import '../../mais/lutas/application/lutas_controller.dart';
 
 /// Serviço de domínio para criação e substituição de lutas ativas.
 ///
@@ -57,6 +58,7 @@ class StruggleService {
     await repo.save(nova);
 
     _ref.invalidate(hojeControllerProvider);
+    _ref.invalidate(lutasControllerProvider);
     return true;
   }
 

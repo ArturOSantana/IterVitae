@@ -39,6 +39,12 @@ class NotificationPrefs {
     this.meiosAtivo = false,
     this.meiosDiasAntes = 3,
     this.cadenciaConfissao = CadenciaConfissao.desativado,
+    this.angelusManha = false,
+    this.angelusManhaHora = '06:00',
+    this.angelusMeio = false,
+    this.angelusMeioHora = '12:00',
+    this.angelusTarde = false,
+    this.angelusTardeHora = '18:00',
   });
 
   /// Notificação do Exame Diário + Luta à noite.
@@ -56,6 +62,14 @@ class NotificationPrefs {
   /// Lembrete periódico de confissão.
   final CadenciaConfissao cadenciaConfissao;
 
+  /// Angelus — manhã (06:00), meio-dia (12:00), tarde (18:00).
+  final bool angelusManha;
+  final String angelusManhaHora;
+  final bool angelusMeio;
+  final String angelusMeioHora;
+  final bool angelusTarde;
+  final String angelusTardeHora;
+
   NotificationPrefs copyWith({
     bool? exameAtivo,
     String? exameHora,
@@ -64,6 +78,12 @@ class NotificationPrefs {
     bool? meiosAtivo,
     int? meiosDiasAntes,
     CadenciaConfissao? cadenciaConfissao,
+    bool? angelusManha,
+    String? angelusManhaHora,
+    bool? angelusMeio,
+    String? angelusMeioHora,
+    bool? angelusTarde,
+    String? angelusTardeHora,
   }) {
     return NotificationPrefs(
       exameAtivo: exameAtivo ?? this.exameAtivo,
@@ -73,6 +93,12 @@ class NotificationPrefs {
       meiosAtivo: meiosAtivo ?? this.meiosAtivo,
       meiosDiasAntes: meiosDiasAntes ?? this.meiosDiasAntes,
       cadenciaConfissao: cadenciaConfissao ?? this.cadenciaConfissao,
+      angelusManha: angelusManha ?? this.angelusManha,
+      angelusManhaHora: angelusManhaHora ?? this.angelusManhaHora,
+      angelusMeio: angelusMeio ?? this.angelusMeio,
+      angelusMeioHora: angelusMeioHora ?? this.angelusMeioHora,
+      angelusTarde: angelusTarde ?? this.angelusTarde,
+      angelusTardeHora: angelusTardeHora ?? this.angelusTardeHora,
     );
   }
 }
@@ -90,6 +116,12 @@ class NotificationPrefsController
   static const _kMeiosAtivo = 'notif_meios_ativo';
   static const _kMeiosDiasAntes = 'notif_meios_dias_antes';
   static const _kCadenciaConfissao = 'notif_cadencia_confissao';
+  static const _kAngelusManha = 'notif_angelus_manha';
+  static const _kAngelusManhaHora = 'notif_angelus_manha_hora';
+  static const _kAngelusMeio = 'notif_angelus_meio';
+  static const _kAngelusMeioHora = 'notif_angelus_meio_hora';
+  static const _kAngelusTarde = 'notif_angelus_tarde';
+  static const _kAngelusTardeHora = 'notif_angelus_tarde_hora';
 
   @override
   Future<NotificationPrefs> build() async {
@@ -103,6 +135,12 @@ class NotificationPrefsController
       meiosDiasAntes: prefs.getInt(_kMeiosDiasAntes) ?? 3,
       cadenciaConfissao: CadenciaConfissao.values[
           prefs.getInt(_kCadenciaConfissao) ?? 0],
+      angelusManha: prefs.getBool(_kAngelusManha) ?? false,
+      angelusManhaHora: prefs.getString(_kAngelusManhaHora) ?? '06:00',
+      angelusMeio: prefs.getBool(_kAngelusMeio) ?? false,
+      angelusMeioHora: prefs.getString(_kAngelusMeioHora) ?? '12:00',
+      angelusTarde: prefs.getBool(_kAngelusTarde) ?? false,
+      angelusTardeHora: prefs.getString(_kAngelusTardeHora) ?? '18:00',
     );
   }
 
@@ -117,6 +155,12 @@ class NotificationPrefsController
     await p.setBool(_kMeiosAtivo, prefs.meiosAtivo);
     await p.setInt(_kMeiosDiasAntes, prefs.meiosDiasAntes);
     await p.setInt(_kCadenciaConfissao, prefs.cadenciaConfissao.index);
+    await p.setBool(_kAngelusManha, prefs.angelusManha);
+    await p.setString(_kAngelusManhaHora, prefs.angelusManhaHora);
+    await p.setBool(_kAngelusMeio, prefs.angelusMeio);
+    await p.setString(_kAngelusMeioHora, prefs.angelusMeioHora);
+    await p.setBool(_kAngelusTarde, prefs.angelusTarde);
+    await p.setString(_kAngelusTardeHora, prefs.angelusTardeHora);
 
     await _rescheduleAll(prefs);
   }
@@ -208,6 +252,52 @@ class NotificationPrefsController
         channelId: 'iter_vitae_confissao',
         channelName: 'Confissão',
         channelDesc: 'Lembrete periódico de confissão',
+      );
+    }
+
+    // ── Angelus ─────────────────────────────────────────────────────────────
+    const angelusChannel = 'iter_vitae_angelus';
+    const angelusChannelName = 'Angelus';
+    const angelusChannelDesc = 'Lembretes do Angelus (manhã, meio-dia e tarde)';
+    const angelusTitle = 'Angelus';
+    const angelusBody = 'O anjo do Senhor anunciou a Maria…';
+
+    await svc.cancelById(NotificationService.kIdAngelusManha);
+    if (prefs.angelusManha) {
+      await svc.scheduleDailyById(
+        id: NotificationService.kIdAngelusManha,
+        title: angelusTitle,
+        body: angelusBody,
+        scheduledTime: prefs.angelusManhaHora,
+        channelId: angelusChannel,
+        channelName: angelusChannelName,
+        channelDesc: angelusChannelDesc,
+      );
+    }
+
+    await svc.cancelById(NotificationService.kIdAngelusMeio);
+    if (prefs.angelusMeio) {
+      await svc.scheduleDailyById(
+        id: NotificationService.kIdAngelusMeio,
+        title: angelusTitle,
+        body: angelusBody,
+        scheduledTime: prefs.angelusMeioHora,
+        channelId: angelusChannel,
+        channelName: angelusChannelName,
+        channelDesc: angelusChannelDesc,
+      );
+    }
+
+    await svc.cancelById(NotificationService.kIdAngelusTarde);
+    if (prefs.angelusTarde) {
+      await svc.scheduleDailyById(
+        id: NotificationService.kIdAngelusTarde,
+        title: angelusTitle,
+        body: angelusBody,
+        scheduledTime: prefs.angelusTardeHora,
+        channelId: angelusChannel,
+        channelName: angelusChannelName,
+        channelDesc: angelusChannelDesc,
       );
     }
   }

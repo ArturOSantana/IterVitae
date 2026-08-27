@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iter_vitae/core/notifications/notification_service.dart';
+import 'package:iter_vitae/core/notifications/web_notification_service.dart';
 import 'package:iter_vitae/domain/entities/practice.dart';
 import 'package:iter_vitae/providers.dart';
 
@@ -41,7 +43,10 @@ class NotificationController extends AsyncNotifier<NotificationState> {
   Future<NotificationState> build() async {
     // Observa mudanças no repositório de práticas para sincronizar
     ref.read(practiceRepositoryProvider);
-    return const NotificationState();
+    // Na web, a permissão pode já ter sido concedida em sessão anterior.
+    final alreadyGranted =
+        kIsWeb && WebNotificationService.instance.isGranted;
+    return NotificationState(permissionGranted: alreadyGranted);
   }
 
   /// Solicita permissão e, se concedida, sincroniza notificações.

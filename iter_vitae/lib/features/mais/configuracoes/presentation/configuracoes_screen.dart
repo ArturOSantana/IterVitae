@@ -45,6 +45,8 @@ class ConfiguracoesScreen extends ConsumerWidget {
           _DiretorCard(ref: ref),
           const SizedBox(height: 8),
           const _VincularDiretorTile(),
+          const SizedBox(height: 8),
+          const _SouDiretorTile(),
           const SizedBox(height: 24),
 
           // ── Privacidade ────────────────────────────────────────────────
@@ -610,6 +612,83 @@ class _NotificacoesExtrasCardState
                       _update(prefs.copyWith(cadenciaConfissao: c)),
                 ),
               ],
+
+              Divider(height: 24, color: AppColors.divider),
+
+              // ── Angelus ───────────────────────────────────────────────
+              Text(
+                'Angelus',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Lembrete nos três horários tradicionais.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              _NotifToggleRow(
+                label: 'Manhã',
+                sublabel: 'Primeiro Angelus do dia.',
+                value: prefs.angelusManha,
+                onChanged: (v) =>
+                    _update(prefs.copyWith(angelusManha: v)),
+              ),
+              if (prefs.angelusManha) ...[
+                const SizedBox(height: 6),
+                _HorarioRow(
+                  hora: prefs.angelusManhaHora,
+                  onEdit: () => _editarHora(
+                    prefs,
+                    prefs.angelusManhaHora,
+                    (h) => prefs.copyWith(angelusManhaHora: h),
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 4),
+              _NotifToggleRow(
+                label: 'Meio-dia',
+                sublabel: 'Angelus do meio do dia.',
+                value: prefs.angelusMeio,
+                onChanged: (v) =>
+                    _update(prefs.copyWith(angelusMeio: v)),
+              ),
+              if (prefs.angelusMeio) ...[
+                const SizedBox(height: 6),
+                _HorarioRow(
+                  hora: prefs.angelusMeioHora,
+                  onEdit: () => _editarHora(
+                    prefs,
+                    prefs.angelusMeioHora,
+                    (h) => prefs.copyWith(angelusMeioHora: h),
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 4),
+              _NotifToggleRow(
+                label: 'Tarde',
+                sublabel: 'Angelus do fim do dia.',
+                value: prefs.angelusTarde,
+                onChanged: (v) =>
+                    _update(prefs.copyWith(angelusTarde: v)),
+              ),
+              if (prefs.angelusTarde) ...[
+                const SizedBox(height: 6),
+                _HorarioRow(
+                  hora: prefs.angelusTardeHora,
+                  onEdit: () => _editarHora(
+                    prefs,
+                    prefs.angelusTardeHora,
+                    (h) => prefs.copyWith(angelusTardeHora: h),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -983,6 +1062,42 @@ class _VincularDiretorTile extends ConsumerWidget {
         onTap: temDiretor
             ? null
             : () => context.push('/mais/vincular-diretor'),
+        dense: true,
+      ),
+    );
+  }
+}
+
+/// Tile para o diretor espiritual inserir o código de um novo dirigido.
+class _SouDiretorTile extends StatelessWidget {
+  const _SouDiretorTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(
+          Icons.manage_accounts_outlined,
+          size: 20,
+          color: AppColors.textMuted,
+        ),
+        title: Text(
+          'Sou diretor espiritual',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        subtitle: Text(
+          'Insira o código do seu dirigido para vinculá-lo.',
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(color: AppColors.textMuted),
+        ),
+        trailing: const Icon(
+          Icons.chevron_right,
+          size: 20,
+          color: AppColors.textMuted,
+        ),
+        onTap: () => context.push('/mais/inserir-codigo-dirigido'),
         dense: true,
       ),
     );
