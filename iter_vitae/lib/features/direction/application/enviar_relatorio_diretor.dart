@@ -96,13 +96,16 @@ final enviarRelatorioDiretorProvider = AsyncNotifierProvider<
 );
 
 /// Provider que indica se o usuário tem um diretor vinculado.
-final temDiretorVinculadoProvider = FutureProvider<bool>((ref) async {
+/// Usa snapshots em tempo real para reagir ao desvínculo feito pelo diretor.
+final temDiretorVinculadoProvider = StreamProvider<bool>((ref) {
   final uid = ref.watch(currentUserProvider.select((v) => v.valueOrNull?.uid));
-  if (uid == null) return false;
-  final doc = await FirebaseFirestore.instance
+  if (uid == null) return Stream.value(false);
+  return FirebaseFirestore.instance
       .collection('users')
       .doc(uid)
-      .get();
-  final directorUid = doc.data()?['directorUid'] as String?;
-  return directorUid != null && directorUid.isNotEmpty;
+      .snapshots()
+      .map((snap) {
+        final directorUid = snap.data()?['directorUid'] as String?;
+        return directorUid != null && directorUid.isNotEmpty;
+      });
 });

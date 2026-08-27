@@ -52,11 +52,11 @@ class DirectorInviteCodeController
         ),
         'usado': false,
         if (diretorState?.nome?.isNotEmpty == true)
-          'diretorNome': diretorState!.nome,
+          'nome': diretorState!.nome,
         if (diretorState?.contato?.isNotEmpty == true)
-          'diretorTelefone': diretorState!.contato,
+          'telefone': diretorState!.contato,
         if (diretorState?.paroquia?.isNotEmpty == true)
-          'diretorParoquia': diretorState!.paroquia,
+          'paroquia': diretorState!.paroquia,
       });
 
       state = AsyncData(DirectorInviteCodeState(codigo: codigo));

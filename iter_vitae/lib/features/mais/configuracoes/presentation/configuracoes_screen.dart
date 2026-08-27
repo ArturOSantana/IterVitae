@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -1189,8 +1190,7 @@ class _ActionTile extends StatelessWidget {
   }
 }
 
-/// Tile que mostra o status do vínculo com o diretor e navega para a tela
-/// de geração de código quando não há vínculo ainda.
+/// Tile que mostra o status do vínculo com o diretor e permite desvincular.
 class _VincularDiretorTile extends ConsumerWidget {
   const _VincularDiretorTile();
 
@@ -1212,7 +1212,7 @@ class _VincularDiretorTile extends ConsumerWidget {
         ),
         subtitle: Text(
           temDiretor
-              ? 'Vínculo ativo. Para desvincular, contate o suporte.'
+              ? 'Vínculo ativo.'
               : 'Insira o código gerado pelo seu diretor espiritual.',
           style: Theme.of(context)
               .textTheme
@@ -1220,7 +1220,15 @@ class _VincularDiretorTile extends ConsumerWidget {
               ?.copyWith(color: AppColors.textMuted),
         ),
         trailing: temDiretor
-            ? null
+            ? TextButton(
+                onPressed: () => _confirmarDesvinculo(context, ref),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.error,
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text('Desvincular'),
+              )
             : const Icon(Icons.chevron_right,
                 size: 20, color: AppColors.textMuted),
         onTap: temDiretor
@@ -1229,6 +1237,40 @@ class _VincularDiretorTile extends ConsumerWidget {
         dense: true,
       ),
     );
+  }
+
+  Future<void> _confirmarDesvinculo(BuildContext context, WidgetRef ref) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Desvincular diretor'),
+        content: const Text(
+          'Você deixará de estar vinculado ao seu diretor espiritual. '
+          'Poderá vincular novamente com um novo código.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Desvincular'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar != true) return;
+
+    final user = ref.read(currentUserProvider).valueOrNull;
+    if (user == null) return;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .update({'directorUid': FieldValue.delete()});
   }
 }
 

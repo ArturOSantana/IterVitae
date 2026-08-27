@@ -85,9 +85,9 @@ class ResgatarCodigoDiretorController
       }
 
       // Campos opcionais que o app diretor pode ter incluído no código
-      final diretorNome = data['diretorNome'] as String?;
-      final diretorTelefone = data['diretorTelefone'] as String?;
-      final diretorParoquia = data['diretorParoquia'] as String?;
+      final diretorNome = data['nome'] as String?;
+      final diretorTelefone = data['telefone'] as String?;
+      final diretorParoquia = data['paroquia'] as String?;
 
       // Grava o vínculo atomicamente:
       // 1. directorUid no perfil do dirigido (para envio de relatórios, etc.)
